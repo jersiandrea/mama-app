@@ -1060,20 +1060,25 @@ function openPhoto(idx){ var it=albItems[idx];if(!it||!it.photo)return;document.
 function closePhoto(){ document.getElementById('photo-overlay').style.display='none'; }
 function openVideoOverlay(idx){
   var it=albItems[idx]; if(!it||!it.video)return;
-  var ov=document.getElementById('video-overlay');
   var vid=document.getElementById('vo-vid');
+  // 先完整重置，避免舊影片殘留
+  vid.pause();
+  vid.removeAttribute('src');
   vid.innerHTML='';
-  var mt=it.video.match(/^data:(video\/[^;]+)/);
-  var mime=mt?mt[1]:'video/mp4';
-  var s1=document.createElement('source');s1.src=it.video;s1.type=mime;
-  var s2=document.createElement('source');s2.src=it.video;s2.type='video/mp4';
-  vid.appendChild(s1);vid.appendChild(s2);
-  vid.load(); vid.play().catch(function(){});
-  ov.style.display='flex';
+  vid.load();
+  // 直接用 src 設定（比 <source> 更穩定）
+  vid.src=it.video;
+  vid.load();
+  vid.play().catch(function(){});
+  document.getElementById('video-overlay').style.display='flex';
 }
 function closeVideoOverlay(e){
   if(e&&e.target!==document.getElementById('video-overlay')&&e.target!==document.querySelector('#video-overlay button'))return;
-  var vid=document.getElementById('vo-vid'); vid.pause(); vid.src=''; vid.innerHTML='';
+  var vid=document.getElementById('vo-vid');
+  vid.pause();
+  vid.removeAttribute('src');
+  vid.innerHTML='';
+  vid.load();
   document.getElementById('video-overlay').style.display='none';
 }
 </script>
