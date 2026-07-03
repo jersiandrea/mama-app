@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>媽媽的好幫手</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--bg:#FBF7EF;--card:#FFF;--ink:#232323;--soft:#5B5648;--border:#E6DECF;
+  --sage:#3F6F58;--sage-l:#E4EFE8;--terra:#C76B3D;--terra-l:#FAEAE0;
+  --blue:#4C6E8C;--blue-l:#E6EEF4;--danger:#B3463A;}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Microsoft JhengHei",sans-serif;
+  font-size:20px;line-height:1.6;}
+#app{max-width:480px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;padding-bottom:100px;}
+header{padding:22px 20px 10px;}
+.greet{font-size:30px;font-weight:700;}
+.dateline{font-size:17px;color:var(--soft);margin-top:2px;}
+main{flex:1;padding:0 16px;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:18px;margin-bottom:18px;}
+h2{font-size:24px;margin:0 0 14px;font-weight:700;}
+h3{font-size:19px;margin:0 0 10px;font-weight:700;color:var(--soft);}
+button{font-family:inherit;cursor:pointer;}
+.big{width:100%;font-size:22px;font-weight:700;padding:20px;border-radius:16px;border:none;
+  display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:12px;}
+.b-sage{background:var(--sage);color:#fff;}
+.b-terra{background:var(--terra);color:#fff;}
+.b-blue{background:var(--blue);color:#fff;}
+.b-out{background:#fff;color:var(--ink);border:2px solid var(--border);}
+.b-out.sel{border-color:var(--sage);background:var(--sage-l);color:var(--sage);}
+.b-danger{background:var(--danger);color:#fff;}
+nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);
+  display:flex;gap:6px;padding:8px;max-width:480px;margin:0 auto;z-index:100;}
+nav button{flex:1;background:none;border:none;padding:9px 4px 7px;font-size:13px;
+  color:var(--soft);border-radius:12px;}
+nav button[data-c="home"]{background:#F1EEE5;}
+nav button[data-c="acc"]{background:var(--sage-l);color:var(--sage);}
+nav button[data-c="eng"]{background:var(--terra-l);color:var(--terra);}
+nav button[data-c="alb"]{background:var(--blue-l);color:var(--blue);}
+nav button.on[data-c="home"]{background:#D8D2C0;color:var(--ink);font-weight:700;}
+nav button.on[data-c="acc"]{background:var(--sage);color:#fff;font-weight:700;}
+nav button.on[data-c="eng"]{background:var(--terra);color:#fff;font-weight:700;}
+nav button.on[data-c="alb"]{background:var(--blue);color:#fff;font-weight:700;}
+nav .ico{font-size:22px;display:block;margin-bottom:1px;}
+.tab{display:none;}.tab.on{display:block;}
+select,textarea,input[type=text],input[type=number],input[type=datetime-local]{
+  width:100%;font-size:19px;padding:12px;border-radius:12px;
+  border:2px solid var(--border);font-family:inherit;background:#fff;color:var(--ink);}
+.pill{display:inline-block;padding:4px 10px;border-radius:999px;font-size:14px;font-weight:700;}
+.row{display:flex;justify-content:space-between;align-items:flex-start;
+  padding:12px 0;border-bottom:1px solid var(--border);gap:8px;}
+.row:last-child{border-bottom:none;}
+.rl{flex:1;min-width:0;}.rr{display:flex;align-items:center;gap:6px;flex-shrink:0;margin-top:2px;}
+.dt{font-size:13px;color:var(--soft);margin-top:2px;}
+.soft{color:var(--soft);font-size:16px;}
+.mic{width:76px;height:76px;border-radius:50%;border:none;font-size:32px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.mic.idle{background:var(--sage);color:#fff;}
+.mic.rec{background:var(--danger);color:#fff;animation:pulse 1s infinite;}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(179,70,58,.4);}70%{box-shadow:0 0 0 16px rgba(179,70,58,0);}100%{box-shadow:0 0 0 0 rgba(179,70,58,0);}}
+.vrow{display:flex;align-items:center;gap:14px;}
+.vstatus{font-size:16px;color:var(--soft);margin-top:8px;min-height:22px;flex:1;}
+.pie-wrap{display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap;}
+.leg{display:flex;align-items:center;gap:7px;font-size:15px;margin-bottom:5px;}
+.dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
+.mopick{display:flex;gap:8px;margin-bottom:12px;}
+.mopick select{flex:1;font-size:17px;padding:10px 12px;}
+.spend-sec{margin-bottom:18px;}
+.spend-sec+.spend-sec{border-top:1px solid var(--border);padding-top:14px;}
+.rec-scroll{max-height:420px;overflow-y:auto;}
+.edbtn{background:none;border:1px solid var(--border);border-radius:9px;
+  padding:5px 10px;font-size:15px;color:var(--soft);}
+.del-opt{display:block;width:100%;font-size:19px;text-align:left;padding:14px;
+  border:1px solid var(--border);border-radius:12px;background:#fff;margin-bottom:9px;color:var(--ink);}
+.del-opt.red{border-color:var(--danger);color:var(--danger);}
+.pc{font-size:19px;color:var(--sage);font-weight:700;background:var(--sage-l);
+  border-radius:10px;padding:9px 14px;margin-bottom:12px;text-align:center;}
+.wcard{background:var(--terra-l);border-radius:14px;padding:14px;margin-bottom:10px;
+  display:flex;align-items:stretch;gap:10px;}
+.wt{flex:1;}.wen{font-size:19px;font-weight:700;color:var(--terra);}
+.wzh{font-size:16px;color:var(--soft);margin-top:3px;}
+.wplay{background:var(--terra);color:#fff;border:none;border-radius:10px;
+  padding:0 16px;font-size:24px;cursor:pointer;flex-shrink:0;align-self:stretch;
+  display:flex;align-items:center;justify-content:center;min-width:52px;}
+.vcard{background:var(--sage-l);border-radius:14px;padding:14px;margin-bottom:10px;
+  display:flex;align-items:stretch;gap:10px;}
+.vcard .wen{color:var(--sage);}
+.vcard .wplay{background:var(--sage);}
+.chat-box{max-height:240px;overflow-y:auto;margin-top:12px;}
+.bubble{padding:10px 14px;border-radius:14px;margin-bottom:7px;font-size:17px;}
+.me{background:var(--blue-l);margin-left:28px;}.ai{background:var(--sage-l);margin-right:28px;}
+.alb-item{border-bottom:1px solid var(--border);padding:12px 0;}
+.alb-item:last-child{border-bottom:none;}
+.alb-item img{width:100%;border-radius:12px;margin-top:8px;cursor:pointer;}
+.alb-item video{width:100%;border-radius:12px;margin-top:8px;max-height:280px;}
+.ntag{font-weight:700;font-size:18px;}
+.dnl{color:var(--blue);font-weight:700;text-decoration:underline;display:inline-block;margin-top:5px;font-size:15px;}
+.vtoggle{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--border);}
+.vtoggle:last-child{border-bottom:none;}
+.tgl{width:52px;height:28px;border-radius:14px;border:none;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;}
+.tgl.on{background:var(--sage);}.tgl.off{background:var(--border);}
+.tgl::after{content:'';position:absolute;width:20px;height:20px;border-radius:50%;background:#fff;top:4px;transition:left .2s;}
+.tgl.on::after{left:28px;}.tgl.off::after{left:4px;}
+.empty{color:var(--soft);text-align:center;padding:24px 0;font-size:17px;}
+.loading{color:var(--soft);text-align:center;padding:16px;font-size:16px;}
+/* PIN */
+#pin-gate{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;
+  flex-direction:column;align-items:center;justify-content:center;padding:36px 28px;}
+#pin-gate h1{font-size:30px;margin:0 0 6px;}
+#pin-gate p{color:var(--soft);font-size:17px;margin:0 0 28px;text-align:center;}
+#pin-input{font-size:34px;letter-spacing:10px;text-align:center;width:210px;
+  padding:14px;border-radius:14px;border:2px solid var(--border);}
+#pin-err{color:var(--danger);font-size:17px;margin-top:10px;min-height:22px;}
+#pin-submit{margin-top:18px;background:var(--sage);color:#fff;border:none;
+  font-size:21px;font-weight:700;padding:16px 44px;border-radius:14px;}
+/* Modals */
+.mbg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;
+  display:flex;align-items:flex-end;justify-content:center;}
+.mbox{background:#fff;border-radius:22px 22px 0 0;padding:22px 18px;
+  width:100%;max-width:480px;max-height:82vh;overflow-y:auto;}
+.mtitle{font-size:21px;font-weight:700;margin:0 0 18px;}
+.msub{font-size:16px;color:var(--soft);margin:0 0 16px;}
+.frow{margin-bottom:14px;}
+.frow label{display:block;font-size:16px;color:var(--soft);margin-bottom:5px;}
+.mact{display:flex;gap:9px;margin-top:18px;}
+.mact button{flex:1;font-size:19px;font-weight:700;padding:16px;border-radius:12px;border:none;}
+/* Photo overlay */
+#photo-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);
+  z-index:999;align-items:center;justify-content:center;flex-direction:column;}
+#photo-overlay img{max-width:100%;max-height:85vh;object-fit:contain;}
+#photo-overlay button{margin-top:18px;font-size:21px;font-weight:700;
+  padding:13px 34px;border-radius:12px;border:none;background:#fff;color:#232323;}
+</style>
+</head>
+<body>
+
+<!-- PIN -->
+<div id="pin-gate">
+  <h1>🔑 家族通行碼</h1>
+  <p>請輸入通行碼才能進入</p>
+  <input type="password" id="pin-input" inputmode="numeric" maxlength="6" placeholder="••••••" autocomplete="off">
+  <div id="pin-err"></div>
+  <button id="pin-submit" onclick="checkPin()">進入</button>
+</div>
+
+<!-- App -->
+<div id="app" style="display:none;">
+  <header>
+    <div class="greet" id="greet"></div>
+    <div class="dateline" id="dateline"></div>
+  </header>
+  <main>
+
+    <!-- 首頁 -->
+    <div class="tab on" id="t-home">
+      <div class="card">
+        <h2>今天想做什麼？</h2>
+        <button class="big b-sage" onclick="gotoTab('acc')">💰　記帳</button>
+        <button class="big b-terra" onclick="gotoTab('eng')">🗣️　英語學習</button>
+        <button class="big b-blue" onclick="gotoTab('alb')">📷　家人相簿</button>
+      </div>
+      <div class="card">
+        <h2>誰在用這個app？</h2>
+        <select id="who-sel" onchange="setWho(this.value)">
+          <option value="認真復健的火雞媽媽🦃">認真復健的火雞媽媽🦃</option>
+          <option value="帥帥大富翁李董💸">帥帥大富翁李董💸</option>
+          <option value="乂煞☆氣a櫻桃子乂">乂煞☆氣a櫻桃子乂</option>
+          <option value="彩瑜蘋果小胖子🍎">彩瑜蘋果小胖子🍎</option>
+          <option value="心肝寶貝小屁屁">心肝寶貝小屁屁</option>
+        </select>
+      </div>
+      <div class="card">
+        <h2>🔔 每日提醒設定</h2>
+        <p class="soft" style="margin:0 0 12px;">每次打開 app 時，若今天還沒提醒過就會自動顯示。</p>
+        <div class="vtoggle">
+          <div><div style="font-weight:700;">英語練習提醒</div><div class="soft" style="font-size:14px;">每天早上 9:00</div></div>
+          <button class="tgl off" id="tgl-eng" onclick="toggleNotif('eng')"></button>
+        </div>
+        <div class="vtoggle">
+          <div><div style="font-weight:700;">記帳提醒</div><div class="soft" style="font-size:14px;">每天晚上 8:30</div></div>
+          <button class="tgl off" id="tgl-acc" onclick="toggleNotif('acc')"></button>
+        </div>
+        <div id="notif-msg" style="font-size:15px;color:var(--soft);margin-top:10px;"></div>
+      </div>
+    </div>
+
+    <!-- 記帳 -->
+    <div class="tab" id="t-acc">
+      <div class="card">
+        <h2>說一句話幫您記帳</h2>
+        <p class="soft" style="margin:0 0 14px;font-size:16px;">例如：「去家樂福買菜花了三百元」</p>
+        <div class="vrow">
+          <button class="mic idle" id="acc-mic" onclick="toggleAcc()">🎙️</button>
+          <div class="vstatus" id="acc-st">點一下開始說話，再點一下停止</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="spend-sec">
+          <h3>本週花費</h3>
+          <div id="week-chart" class="pie-wrap"><div class="empty" style="padding:8px 0;">本週還沒有紀錄</div></div>
+        </div>
+        <div class="spend-sec">
+          <h3>選月份查看花費</h3>
+          <div class="mopick">
+            <select id="sp-yr" onchange="loadSpend()"></select>
+            <select id="sp-mo" onchange="loadSpend()">
+              <option value="1">1月</option><option value="2">2月</option><option value="3">3月</option>
+              <option value="4">4月</option><option value="5">5月</option><option value="6">6月</option>
+              <option value="7">7月</option><option value="8">8月</option><option value="9">9月</option>
+              <option value="10">10月</option><option value="11">11月</option><option value="12">12月</option>
+            </select>
+          </div>
+          <div id="mo-chart" class="pie-wrap"><div class="empty" style="padding:8px 0;">沒有紀錄</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>最近紀錄</h2>
+        <div id="acc-list" class="rec-scroll"><div class="empty">目前還沒有記帳紀錄</div></div>
+      </div>
+      <div class="card">
+        <h2>🗑️ 清除舊資料</h2>
+        <p class="soft" style="margin:0 0 14px;font-size:16px;">記帳資料永久保存，如需空間可在此清除。</p>
+        <button class="del-opt" onclick="doDelete(3)">清除 3 個月以前的資料</button>
+        <button class="del-opt" onclick="doDelete(6)">清除 6 個月以前的資料</button>
+        <button class="del-opt" onclick="doDelete(12)">清除 1 年以前的資料</button>
+        <button class="del-opt red" onclick="doDelete(0)">⚠️ 清除所有記帳資料</button>
+      </div>
+    </div>
+
+    <!-- 英語 -->
+    <div class="tab" id="t-eng">
+      <div class="card">
+        <h2>今日五句生活英語</h2>
+        <div class="pc" id="play-count">本日練習：0 次</div>
+        <div id="daily-words"></div>
+        <div style="margin-top:18px;">
+          <h3>📝 今日重點單字</h3>
+          <div id="daily-vocab"></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>開口說說看</h2>
+        <p class="soft" style="margin:0 0 12px;font-size:16px;">說英文練習對話。點按鈕開始，再按一次停止。</p>
+        <div class="vrow">
+          <button class="mic idle" id="eng-mic" onclick="toggleEng()">🎙️</button>
+          <div class="vstatus" id="eng-st">點一下開始說，再點一下停止</div>
+        </div>
+        <div class="chat-box" id="chat-box"></div>
+      </div>
+    </div>
+
+    <!-- 相簿 -->
+    <div class="tab" id="t-alb">
+      <div class="card">
+        <h2>分享現在的生活</h2>
+        <textarea id="alb-text" rows="3" placeholder="想跟家人說什麼呢？"></textarea>
+        <div style="margin-top:12px;">
+          <input type="file" id="alb-photo" accept="image/*" capture="environment" style="display:none;" onchange="onPhotoSel(this)">
+          <button class="big b-out" id="photo-btn" onclick="document.getElementById('alb-photo').click()">🖼️　選擇或拍攝照片</button>
+          <input type="file" id="alb-video" accept="video/*" capture="environment" style="display:none;" onchange="onVideoSel(this)">
+          <button class="big b-out" id="video-btn" onclick="document.getElementById('alb-video').click()">🎥　拍攝影片</button>
+          <button class="big b-out red" id="cancel-vid-btn" onclick="cancelVideo()" style="display:none;border-color:var(--danger);color:var(--danger);">✕　取消影片</button>
+          <video id="vid-preview" controls playsinline style="display:none;width:100%;border-radius:12px;margin-top:8px;max-height:260px;"></video>
+          <input type="hidden" id="vid-data">
+          <button class="big b-blue" onclick="postAlbum()">📤　分享出去</button>
+        </div>
+        <p class="soft" style="font-size:15px;margin-top:4px;">照片和影片將在 24 小時後自動刪除，刪除前可下載。</p>
+      </div>
+      <div class="card">
+        <h2>家人都在做什麼</h2>
+        <div id="alb-list"><div class="loading">載入中⋯</div></div>
+      </div>
+    </div>
+
+  </main>
+  <nav>
+    <button class="on" data-c="home" id="n-home" onclick="gotoTab('home')"><span class="ico">🏠</span>首頁</button>
+    <button data-c="acc" id="n-acc" onclick="gotoTab('acc')"><span class="ico">💰</span>記帳</button>
+    <button data-c="eng" id="n-eng" onclick="gotoTab('eng')"><span class="ico">🗣️</span>英語</button>
+    <button data-c="alb" id="n-alb" onclick="gotoTab('alb')"><span class="ico">📷</span>相簿</button>
+  </nav>
+</div>
+
+<!-- Edit account modal -->
+<div class="mbg" id="edit-modal" style="display:none;" onclick="closeModal('edit-modal',event)">
+  <div class="mbox">
+    <div class="mtitle">修改這筆記帳</div>
+    <input type="hidden" id="edit-id">
+    <div class="frow"><label>說明</label><input type="text" id="edit-desc"></div>
+    <div class="frow"><label>金額（元）</label><input type="number" id="edit-amt" inputmode="numeric"></div>
+    <div class="frow"><label>分類</label>
+      <select id="edit-cat">
+        <option value="食">食</option><option value="衣">衣</option><option value="住">住</option>
+        <option value="行">行</option><option value="育">育</option><option value="樂">樂</option><option value="其他">其他</option>
+      </select></div>
+    <div class="frow"><label>日期時間</label><input type="datetime-local" id="edit-dt"></div>
+    <div class="mact">
+      <button onclick="closeModal('edit-modal')" style="background:var(--border);color:var(--ink);">取消</button>
+      <button onclick="saveEdit()" style="background:var(--sage);color:#fff;">儲存</button>
+    </div>
+    <button onclick="delEntry()" style="width:100%;margin-top:9px;font-size:19px;font-weight:700;padding:16px;border-radius:12px;border:none;background:var(--danger);color:#fff;">🗑️　刪除這筆記帳</button>
+  </div>
+</div>
+
+<!-- Confirm delete modal -->
+<div class="mbg" id="del-modal" style="display:none;" onclick="closeModal('del-modal',event)">
+  <div class="mbox">
+    <div class="mtitle" id="del-title"></div>
+    <div class="msub" id="del-sub"></div>
+    <p style="color:var(--danger);font-size:16px;">⚠️ 刪除後無法復原。</p>
+    <div class="mact">
+      <button onclick="closeModal('del-modal')" style="background:var(--border);color:var(--ink);">取消</button>
+      <button id="del-ok" style="background:var(--danger);color:#fff;">確認刪除</button>
+    </div>
+  </div>
+</div>
+
+<!-- Photo overlay -->
+<div id="photo-overlay" onclick="closePhoto()">
+  <img id="po-img" src="" alt="">
+  <button onclick="closePhoto()">✕　關閉</button>
+</div>
+
+<div id="video-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:999;flex-direction:column;align-items:center;justify-content:center;" onclick="closeVideoOverlay(event)">
+  <video id="vo-vid" controls playsinline style="max-width:100%;max-height:85vh;border-radius:10px;" autoplay></video>
+  <button onclick="closeVideoOverlay()" style="margin-top:18px;font-size:21px;font-weight:700;padding:13px 34px;border-radius:12px;border:none;background:#fff;color:#232323;">✕　關閉</button>
+</div>
+
+<script>
+'use strict';
+/* ════════════════════════════════════════
+   CONFIG
+════════════════════════════════════════ */
+const SB_URL = 'https://delitxgwwtfqbqaoopgs.supabase.co';
+const SB_KEY = 'sb_publishable_SzYbgNIWGi_MNGtNl1_iQQ_K-6Z0aIT';
+const PIN = '168168';
+var sb;
+try {
+  sb = supabase.createClient(SB_URL, SB_KEY);
+} catch(e) {
+  console.error('Supabase init error:', e);
+}
+const CAT_COLOR = {食:'#C76B3D',衣:'#4C6E8C',住:'#3F6F58',行:'#9B7EC8',育:'#D9A23B',樂:'#B3463A',其他:'#888'};
+
+/* ════════════════════════════════════════
+   PIN GATE
+════════════════════════════════════════ */
+function checkPin() {
+  var v = document.getElementById('pin-input').value.trim();
+  if (v === PIN) {
+    sessionStorage.setItem('ok','1');
+    document.getElementById('pin-gate').style.display = 'none';
+    var a = document.getElementById('app');
+    a.style.display = 'flex'; a.style.flexDirection = 'column';
+    initApp();
+  } else {
+    document.getElementById('pin-err').textContent = '通行碼不對，請再試一次';
+    document.getElementById('pin-input').value = '';
+  }
+}
+if(document.getElementById('pin-submit')) document.getElementById('pin-submit').onclick = checkPin;
+document.getElementById('pin-input').onkeydown = function(e){ if(e.key==='Enter') checkPin(); };
+
+if (sessionStorage.getItem('ok') === '1') {
+  document.getElementById('pin-gate').style.display = 'none';
+  var _a = document.getElementById('app');
+  _a.style.display = 'flex'; _a.style.flexDirection = 'column';
+}
+
+/* ════════════════════════════════════════
+   APP INIT
+════════════════════════════════════════ */
+var who = '認真復健的火雞媽媽🦃';
+
+function initApp() {
+  var d = new Date();
+  var wd = ['日','一','二','三','四','五','六'];
+  document.getElementById('greet').textContent = d.getHours()<11?'早安！':d.getHours()<18?'午安！':'晚安！';
+  document.getElementById('dateline').textContent =
+    d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日　星期'+wd[d.getDay()];
+
+  who = localStorage.getItem('who') || '認真復健的火雞媽媽🦃';
+  document.getElementById('who-sel').value = who;
+
+  // year dropdown
+  try {
+    var yrEl = document.getElementById('sp-yr');
+    if (yrEl) {
+      yrEl.innerHTML = '';
+      for (var y = d.getFullYear(); y >= d.getFullYear()-3; y--) {
+        var o = document.createElement('option');
+        o.value = y; o.textContent = y+'年';
+        if (y === d.getFullYear()) o.selected = true;
+        yrEl.appendChild(o);
+      }
+    }
+    var moEl = document.getElementById('sp-mo');
+    if (moEl) moEl.value = d.getMonth()+1;
+  } catch(e) { console.warn('Year dropdown init error:', e); }
+
+  initNotifToggles();
+  loadPlayCount();
+  renderWords();
+  renderVocab();
+  loadAcc();
+  loadAlbum();
+
+  if (typeof speechSynthesis !== 'undefined') {
+    speechSynthesis.getVoices();
+    speechSynthesis.onvoiceschanged = function(){ speechSynthesis.getVoices(); };
+  }
+}
+
+if (sessionStorage.getItem('ok') === '1') { initApp(); }
+
+function setWho(v) { who = v; localStorage.setItem('who', v); }
+
+/* ════════════════════════════════════════
+   TAB NAVIGATION
+════════════════════════════════════════ */
+function gotoTab(name) {
+  var map = {home:'t-home',acc:'t-acc',eng:'t-eng',alb:'t-alb'};
+  var navmap = {home:'n-home',acc:'n-acc',eng:'n-eng',alb:'n-alb'};
+  document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('on'); });
+  document.querySelectorAll('nav button').forEach(function(b){ b.classList.remove('on'); });
+  document.getElementById(map[name]).classList.add('on');
+  var nb = document.getElementById(navmap[name]);
+  if (nb) nb.classList.add('on');
+  if (name === 'acc') { loadAcc(); }
+  if (name === 'eng') { renderWords(); renderVocab(); loadPlayCount(); }
+  if (name === 'alb') { loadAlbum(); }
+}
+
+/* ════════════════════════════════════════
+   UTILITIES
+════════════════════════════════════════ */
+function esc(s) {
+  var d = document.createElement('div'); d.textContent = s; return d.innerHTML;
+}
+function fmtDt(iso) {
+  var d = new Date(iso);
+  return d.getFullYear()+'/'
+    +String(d.getMonth()+1).padStart(2,'0')+'/'
+    +String(d.getDate()).padStart(2,'0')+' '
+    +String(d.getHours()).padStart(2,'0')+':'
+    +String(d.getMinutes()).padStart(2,'0');
+}
+function closeModal(id, e) {
+  if (e && e.target !== document.getElementById(id)) return;
+  document.getElementById(id).style.display = 'none';
+}
+function fileToB64(file) {
+  return new Promise(function(res, rej){
+    var r = new FileReader();
+    r.onload = function(){ res(r.result); };
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+}
+
+/* ════════════════════════════════════════
+   VOICE HELPERS
+════════════════════════════════════════ */
+function tts(text, lang, rate, voice) {
+  var u = new SpeechSynthesisUtterance(text);
+  u.lang = lang || 'zh-TW'; u.rate = rate || 0.95; u.pitch = 1;
+  if (voice) u.voice = voice;
+  return u;
+}
+function getSR(lang) {
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return null;
+  var r = new SR(); r.lang = lang; r.interimResults = false; r.maxAlternatives = 1;
+  return r;
+}
+function micErr(e, el) {
+  if (e.error==='not-allowed'||e.error==='service-not-allowed')
+    el.textContent = '請在瀏覽器設定允許麥克風';
+  else if (e.error==='no-speech') el.textContent = '沒有聽到聲音，請再試一次';
+  else if (e.error==='aborted') el.textContent = '錄音已停止';
+  else el.textContent = '發生問題（'+e.error+'），請再試一次';
+}
+
+/* ════════════════════════════════════════
+   AI CALL
+════════════════════════════════════════ */
+async function callAI(messages, task) {
+  try {
+    if (!sb) { console.warn('Supabase not initialized'); return null; }
+    var res = await sb.functions.invoke('ai-proxy', { body: { messages: messages, task: task } });
+    if (res.error) { console.error('AI error', res.error); return null; }
+    var d = res.data;
+    if (!d || !d.content) return null;
+    var b = d.content.find(function(x){ return x.type==='text'; });
+    return b ? b.text.trim() : null;
+  } catch(e) { console.error('callAI:', e); return null; }
+}
+
+/* ════════════════════════════════════════
+   ACCOUNTING
+════════════════════════════════════════ */
+var accRec = null, accListen = false;
+
+function toggleAcc() {
+  var btn = document.getElementById('acc-mic');
+  var st  = document.getElementById('acc-st');
+  if (accListen && accRec) {
+    try { accRec.abort(); } catch(e){}
+    accListen = false; accRec = null;
+    btn.className = 'mic idle'; st.textContent = '錄音已停止'; return;
+  }
+  var SR = getSR('zh-TW');
+  if (!SR) { st.textContent = '這個瀏覽器不支援語音輸入'; return; }
+  accRec = SR; accListen = true;
+  btn.className = 'mic rec'; st.textContent = '錄音中… 再點一下停止';
+  accRec.start();
+  accRec.onresult = function(e) {
+    var text = e.results[0][0].transcript;
+    accListen = false; try { accRec.abort(); } catch(ex){}
+    accRec = null; btn.className = 'mic idle';
+    st.textContent = '聽到：「'+text+'」　AI 分析中…';
+    processAccVoice(text, btn, st);
+  };
+  accRec.onerror = function(e){
+    accListen = false; accRec = null; btn.className = 'mic idle'; micErr(e, st);
+  };
+  accRec.onend = function(){
+    accListen = false; accRec = null; btn.className = 'mic idle';
+  };
+}
+
+async function processAccVoice(text, btn, st) {
+  var amount = null, category = '其他', desc = text;
+  var ai = await callAI([{role:'user',content:text}], 'classify_expense');
+  if (ai) {
+    try {
+      var p = JSON.parse(ai.replace(/```json|```/g,'').trim());
+      amount = p.amount; category = p.category || '其他'; desc = p.desc || text;
+    } catch(e) { amount = extractAmt(text); category = guessCategory(text); }
+  } else {
+    amount = extractAmt(text); category = guessCategory(text);
+  }
+  if (amount) {
+    await sb.from('accounts').insert({
+      id: 'acc_'+Date.now(), amount: amount, category: category,
+      raw: desc, profile: who
+    });
+    st.textContent = '已記錄：'+category+'　'+amount+'元';
+    sayZh('已幫您記錄，'+category+'類，花了'+amount+'元');
+    loadAcc();
+  } else {
+    st.textContent = '沒有聽清楚金額，請再說一次';
+    sayZh('沒有聽清楚金額，麻煩再說一次');
+  }
+}
+
+var CK = {食:['吃','飯','菜','餐','水果','早餐','午餐','晚餐','飲料','咖啡','麵','零食','便當','奶茶','麵包'],衣:['衣服','鞋','褲','裙','外套','內衣','帽子'],住:['房租','水電','瓦斯','管理費','家具','日用品','衛生紙','清潔'],行:['公車','捷運','計程車','加油','停車','高鐵','火車','交通','車票'],育:['醫療','看醫生','藥','掛號','學費','書','教育'],樂:['電影','旅遊','娛樂','唱歌','聚餐','禮物','遊玩']};
+function guessCategory(t) { for(var c in CK){ for(var i=0;i<CK[c].length;i++){ if(t.includes(CK[c][i])) return c; }} return '其他'; }
+function cnToNum(s){var m={零:0,一:1,二:2,三:3,四:4,五:5,六:6,七:7,八:8,九:9,十:10,百:100,千:1000,兩:2};if(/^[0-9]+$/.test(s))return parseInt(s);var t=0,n=0;for(var i=0;i<s.length;i++){var v=m[s[i]];if(v===undefined)continue;if(v>=10){if(n===0)n=1;t+=n*v;n=0;}else n=v;}return t+n;}
+function extractAmt(t){var d=t.match(/(\d+)\s*元?/);if(d)return parseInt(d[1]);var c=t.match(/([零一二兩三四五六七八九十百千]+)\s*元/);if(c)return cnToNum(c[1]);return null;}
+
+function getWeekStart(){var n=new Date(),d=n.getDay(),m=new Date(n);m.setDate(n.getDate()-(d===0?6:d-1));m.setHours(0,0,0,0);return m;}
+
+var accEntries = [];
+
+async function loadAcc() {
+  var lst = document.getElementById('acc-list');
+  lst.innerHTML = '<div class="loading">載入中⋯</div>';
+  // week chart
+  var ws = getWeekStart();
+  if(!sb){renderPie(document.getElementById('week-chart'),[]);document.getElementById('acc-list').innerHTML='<div class="empty">資料庫未連線</div>';return;}
+  var wr = await sb.from('accounts').select('*').gte('created_at', ws.toISOString());
+  renderPie(document.getElementById('week-chart'), wr.data || []);
+  // month chart + list
+  loadSpend();
+}
+
+async function loadSpend() {
+  var lst = document.getElementById('acc-list');
+  lst.innerHTML = '<div class="loading">載入中⋯</div>';
+  var yr = parseInt(document.getElementById('sp-yr').value || new Date().getFullYear());
+  var mo = parseInt(document.getElementById('sp-mo').value || new Date().getMonth()+1);
+  var start = new Date(yr, mo-1, 1).toISOString();
+  var end   = new Date(yr, mo, 0, 23, 59, 59).toISOString();
+  var r = await sb.from('accounts').select('*').gte('created_at', start).lte('created_at', end).order('created_at', {ascending:false});
+  renderPie(document.getElementById('mo-chart'), r.data || []);
+  accEntries = r.data || [];
+  if (!accEntries.length) {
+    lst.innerHTML = '<div class="empty">該月份沒有記帳紀錄</div>'; return;
+  }
+  lst.innerHTML = accEntries.map(function(e, i){
+    var pc = CAT_COLOR[e.category] || '#888';
+    return '<div class="row">'
+      +'<div class="rl"><span class="pill" style="background:'+pc+'22;color:'+pc+'">'+e.category+'</span>'
+      +' <span>'+esc(e.raw)+'</span>'
+      +'<div class="dt">'+fmtDt(e.created_at)+'</div></div>'
+      +'<div class="rr"><span style="font-weight:700;">'+e.amount+'元</span>'
+      +'<button class="edbtn" onclick="openEdit('+i+')">✏️</button></div></div>';
+  }).join('');
+}
+
+function renderPie(el, entries) {
+  if (!entries.length) { el.innerHTML='<div class="empty" style="padding:8px 0;">沒有紀錄</div>'; return; }
+  var totals = {};
+  entries.forEach(function(e){ totals[e.category] = (totals[e.category]||0)+e.amount; });
+  var total = Object.values(totals).reduce(function(a,b){return a+b;},0);
+  var angle = 0, r=58, cx=68, cy=68, paths='';
+  Object.keys(totals).forEach(function(cat){
+    var frac = totals[cat]/total;
+    var a0=angle, a1=angle+frac*2*Math.PI;
+    var x0=cx+r*Math.sin(a0), y0=cy-r*Math.cos(a0);
+    var x1=cx+r*Math.sin(a1), y1=cy-r*Math.cos(a1);
+    paths += '<path d="M'+cx+','+cy+' L'+x0.toFixed(1)+','+y0.toFixed(1)
+      +' A'+r+','+r+' 0 '+((a1-a0)>Math.PI?1:0)+' 1 '+x1.toFixed(1)+','+y1.toFixed(1)+' Z"'
+      +' fill="'+(CAT_COLOR[cat]||'#888')+'"/>';
+    angle = a1;
+  });
+  var legHtml = Object.keys(totals).map(function(cat){
+    var pct = Math.round(totals[cat]/total*100);
+    return '<div class="leg"><span class="dot" style="background:'+(CAT_COLOR[cat]||'#888')+'"></span>'
+      +cat+'：'+totals[cat]+'元 <span style="color:var(--soft);">('+pct+'%)</span></div>';
+  }).join('');
+  el.innerHTML = '<svg width="136" height="136" viewBox="0 0 136 136" style="flex-shrink:0">'+paths+'</svg>'
+    +'<div>'+legHtml+'<div style="font-weight:700;font-size:19px;margin-top:7px;">總計：'+total+'元</div></div>';
+}
+
+function openEdit(i) {
+  var e = accEntries[i]; if(!e) return;
+  document.getElementById('edit-id').value = e.id;
+  document.getElementById('edit-desc').value = e.raw;
+  document.getElementById('edit-amt').value = e.amount;
+  document.getElementById('edit-cat').value = e.category;
+  var d = new Date(e.created_at);
+  document.getElementById('edit-dt').value = new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16);
+  document.getElementById('edit-modal').style.display = 'flex';
+}
+async function saveEdit() {
+  var id = document.getElementById('edit-id').value;
+  var raw = document.getElementById('edit-desc').value.trim();
+  var amt = parseInt(document.getElementById('edit-amt').value);
+  var cat = document.getElementById('edit-cat').value;
+  var dt  = document.getElementById('edit-dt').value;
+  if (!raw||!amt){ alert('說明和金額不能空白'); return; }
+  var upd = {raw:raw, amount:amt, category:cat};
+  if (dt) upd.created_at = new Date(dt).toISOString();
+  await sb.from('accounts').update(upd).eq('id', id);
+  document.getElementById('edit-modal').style.display = 'none';
+  loadAcc();
+}
+async function delEntry() {
+  var id = document.getElementById('edit-id').value;
+  if (!confirm('確定要刪除這筆記帳嗎？')) return;
+  await sb.from('accounts').delete().eq('id', id);
+  document.getElementById('edit-modal').style.display = 'none';
+  loadAcc();
+}
+
+var _delMonths = -1;
+function doDelete(months) {
+  _delMonths = months;
+  var t = document.getElementById('del-title');
+  var s = document.getElementById('del-sub');
+  if (months === 0) {
+    t.textContent = '⚠️ 刪除所有記帳資料';
+    s.textContent = '這將刪除全部記帳紀錄，無法復原。';
+  } else {
+    t.textContent = '清除'+(months===12?'1年':(months+'個月'))+'以前的資料';
+    var co = new Date(); co.setMonth(co.getMonth()-months);
+    s.textContent = '將刪除'+co.getFullYear()+'年'+(co.getMonth()+1)+'月'+co.getDate()+'日以前的所有紀錄。';
+  }
+  document.getElementById('del-ok').onclick = execDelete;
+  document.getElementById('del-modal').style.display = 'flex';
+}
+async function execDelete() {
+  document.getElementById('del-modal').style.display = 'none';
+  if (_delMonths === 0) {
+    await sb.from('accounts').delete().neq('id','__never__');
+  } else {
+    var co = new Date(); co.setMonth(co.getMonth()-_delMonths);
+    await sb.from('accounts').delete().lt('created_at', co.toISOString());
+  }
+  alert('刪除完成！'); loadAcc();
+}
+
+/* ════════════════════════════════════════
+   ENGLISH LEARNING
+════════════════════════════════════════ */
+var ALL_WORDS=[{en:"I'd like some rice, please.",zh:"我想要一些飯。"},{en:"This soup is very delicious.",zh:"這個湯非常好喝。"},{en:"I take my medicine after meals.",zh:"我飯後吃藥。"},{en:"Would you like some tea?",zh:"您想要喝茶嗎？"},{en:"This vegetable is very fresh.",zh:"這個蔬菜很新鮮。"},{en:"I would like a bowl of noodles.",zh:"我想要一碗麵。"},{en:"Can I have some more water, please?",zh:"可以再給我一些水嗎？"},{en:"This fruit is very sweet.",zh:"這個水果很甜。"},{en:"I like to drink warm water every morning.",zh:"我喜歡每天早上喝溫水。"},{en:"This bread smells very good.",zh:"這個麵包聞起來很香。"},{en:"I am a little hungry.",zh:"我有一點餓了。"},{en:"Let us eat lunch together.",zh:"我們一起吃午餐吧。"},{en:"This coffee is a little too strong.",zh:"這個咖啡有一點太濃了。"},{en:"I would like to try this dish.",zh:"我想要試試這道菜。"},{en:"The fish today is very fresh.",zh:"今天的魚非常新鮮。"},{en:"I prefer steamed food over fried food.",zh:"我比較喜歡蒸的而不是炸的。"},{en:"This is my favorite snack.",zh:"這是我最喜歡的零食。"},{en:"Can I have the bill, please?",zh:"請給我帳單，謝謝。"},{en:"I had a very big breakfast today.",zh:"我今天早餐吃了很多。"},{en:"I go for a walk every morning.",zh:"我每天早上去散步。"},{en:"I feel much better today.",zh:"我今天感覺好多了。"},{en:"I need to see a doctor.",zh:"我需要看醫生。"},{en:"I drink warm water every day.",zh:"我每天都喝溫水。"},{en:"I sleep eight hours every night.",zh:"我每晚睡八小時。"},{en:"My back hurts a little today.",zh:"我今天背部有一點痛。"},{en:"I take this medicine every morning.",zh:"我每天早上吃這個藥。"},{en:"I have a doctor's appointment today.",zh:"我今天有預約看醫生。"},{en:"I feel a little tired today.",zh:"我今天感覺有點累。"},{en:"Please rest well and take care.",zh:"請好好休息保重。"},{en:"I do exercise for thirty minutes every day.",zh:"我每天運動三十分鐘。"},{en:"My knee feels a little sore.",zh:"我的膝蓋有一點酸痛。"},{en:"I need to check my blood pressure.",zh:"我需要量血壓。"},{en:"I have been sleeping very well lately.",zh:"我最近睡得很好。"},{en:"Drinking enough water is very important.",zh:"多喝水非常重要。"},{en:"I should eat more vegetables and fruit.",zh:"我應該多吃蔬菜和水果。"},{en:"I feel a little dizzy today.",zh:"我今天感覺有一點頭暈。"},{en:"The doctor said I need more rest.",zh:"醫生說我需要多休息。"},{en:"I take a vitamin every day.",zh:"我每天吃一顆維他命。"},{en:"My appetite is very good today.",zh:"我今天食慾很好。"},{en:"My daughter called me today.",zh:"我女兒今天打電話給我。"},{en:"We had dinner together last night.",zh:"我們昨晚一起吃晚飯。"},{en:"My grandchild is so cute.",zh:"我的孫子真的很可愛。"},{en:"I miss my family very much.",zh:"我非常想念我的家人。"},{en:"Let us take a photo together.",zh:"我們一起照一張相吧。"},{en:"My son came to visit me today.",zh:"我兒子今天來看我了。"},{en:"We had a very happy time together.",zh:"我們在一起玩得非常開心。"},{en:"I talked with my friend on the phone.",zh:"我和朋友在電話上聊天。"},{en:"My husband cooked dinner tonight.",zh:"我先生今晚煮了晚餐。"},{en:"We are planning a family trip.",zh:"我們在計劃一次家族旅行。"},{en:"My sister came to visit yesterday.",zh:"我妹妹昨天來拜訪了。"},{en:"The children are growing up so fast.",zh:"孩子們長大得好快。"},{en:"We celebrated my birthday together.",zh:"我們一起慶祝了我的生日。"},{en:"It is great to see you again.",zh:"很高興再次見到您。"},{en:"I love spending time with my family.",zh:"我喜歡和家人共度時光。"},{en:"How much does this cost?",zh:"這個多少錢？"},{en:"That is a little too expensive.",zh:"這有一點太貴了。"},{en:"I would like to buy some fruit.",zh:"我想要買一些水果。"},{en:"Do you have a smaller size?",zh:"你有小一點的尺寸嗎？"},{en:"Can I pay by card?",zh:"我可以刷卡嗎？"},{en:"I am just looking, thank you.",zh:"我只是看看，謝謝。"},{en:"Can I get a receipt, please?",zh:"可以給我收據嗎？"},{en:"Is there a discount today?",zh:"今天有折扣嗎？"},{en:"This is very good quality.",zh:"這個品質非常好。"},{en:"The weather is very nice today.",zh:"今天天氣非常好。"},{en:"Is it going to rain today?",zh:"今天會下雨嗎？"},{en:"It is very hot outside today.",zh:"外面今天很熱。"},{en:"I like sunny days very much.",zh:"我很喜歡晴天。"},{en:"Please remember to bring an umbrella.",zh:"請記得帶一把傘。"},{en:"The wind is very strong today.",zh:"今天風很大。"},{en:"It is getting cooler in the evening.",zh:"晚上越來越涼了。"},{en:"I love the weather in spring.",zh:"我很喜歡春天的天氣。"},{en:"It has been raining all day today.",zh:"今天下了一整天的雨。"},{en:"I have an appointment at three o'clock.",zh:"我三點有預約。"},{en:"My throat feels a little sore.",zh:"我喉嚨有一點痛。"},{en:"I need to get a blood test.",zh:"我需要抽血檢查。"},{en:"The doctor gave me some new medicine.",zh:"醫生給了我一些新的藥。"},{en:"I need to take this medicine three times a day.",zh:"我需要一天吃這個藥三次。"},{en:"My blood pressure is a little high.",zh:"我的血壓有一點高。"},{en:"The nurse was very kind.",zh:"護士非常親切。"},{en:"I need to come back next week.",zh:"我下週需要回來複診。"},{en:"I feel much better after taking the medicine.",zh:"吃完藥之後我感覺好多了。"},{en:"Good morning, how are you?",zh:"早安，你好嗎？"},{en:"I am doing very well, thank you.",zh:"我很好，謝謝你。"},{en:"Have a nice day!",zh:"祝你今天愉快！"},{en:"See you tomorrow.",zh:"明天見。"},{en:"Thank you very much.",zh:"非常謝謝你。"},{en:"Good evening, how was your day?",zh:"晚安，你今天過得怎麼樣？"},{en:"I wake up at six o'clock every morning.",zh:"我每天早上六點起床。"},{en:"I like to read the news in the morning.",zh:"我喜歡早上看新聞。"},{en:"I usually take a nap after lunch.",zh:"我通常午餐後小睡一下。"},{en:"Good night, sleep well.",zh:"晚安，好好睡覺。"},{en:"I am very happy to see you today.",zh:"我今天很高興見到你。"},{en:"Please say hello to your family for me.",zh:"請代我問候您的家人。"},{en:"I had a very good day today.",zh:"我今天過得非常愉快。"},{en:"I am looking forward to seeing you again.",zh:"我期待再次見到你。"},{en:"Take care of yourself!",zh:"請好好保重！"},{en:"Excuse me, where is the bathroom?",zh:"不好意思，請問廁所在哪裡？"},{en:"I would like a glass of warm water.",zh:"我想要一杯溫水。"},{en:"Can you speak more slowly, please?",zh:"可以請你說慢一點嗎？"},{en:"I do not understand. Can you repeat that?",zh:"我聽不懂，可以再說一遍嗎？"}];
+
+var VOCAB=[{key:'delicious',en:'delicious',zh:'美味的'},{key:'medicine',en:'medicine',zh:'藥'},{key:'vegetable',en:'vegetable',zh:'蔬菜'},{key:'noodles',en:'noodles',zh:'麵條'},{key:'breakfast',en:'breakfast',zh:'早餐'},{key:'hungry',en:'hungry',zh:'餓的'},{key:'favorite',en:'favorite',zh:'最喜歡的'},{key:'exercise',en:'exercise',zh:'運動'},{key:'appointment',en:'appointment',zh:'預約'},{key:'pressure',en:'pressure',zh:'血壓/壓力'},{key:'vitamin',en:'vitamin',zh:'維他命'},{key:'appetite',en:'appetite',zh:'食慾'},{key:'important',en:'important',zh:'重要的'},{key:'dizzy',en:'dizzy',zh:'頭暈的'},{key:'sore',en:'sore',zh:'酸痛的'},{key:'daughter',en:'daughter',zh:'女兒'},{key:'grandchild',en:'grandchild',zh:'孫子/孫女'},{key:'husband',en:'husband',zh:'先生/丈夫'},{key:'planning',en:'planning',zh:'計劃'},{key:'together',en:'together',zh:'一起'},{key:'yesterday',en:'yesterday',zh:'昨天'},{key:'tonight',en:'tonight',zh:'今晚'},{key:'tomorrow',en:'tomorrow',zh:'明天'},{key:'expensive',en:'expensive',zh:'昂貴的'},{key:'discount',en:'discount',zh:'折扣'},{key:'receipt',en:'receipt',zh:'收據'},{key:'quality',en:'quality',zh:'品質'},{key:'umbrella',en:'umbrella',zh:'雨傘'},{key:'evening',en:'evening',zh:'傍晚/晚上'},{key:'throat',en:'throat',zh:'喉嚨'},{key:'slowly',en:'slowly',zh:'慢慢地'},{key:'bathroom',en:'bathroom',zh:'廁所/浴室'},{key:'usually',en:'usually',zh:'通常'},{key:'strong',en:'strong',zh:'強/濃的'}];
+
+function seededRand(seed) {
+  var s = seed|0;
+  return function(){s=Math.imul(s^(s>>>16),0x45d9f3b);s=Math.imul(s^(s>>>16),0x45d9f3b);s=s^(s>>>16);return(s>>>0)/0xFFFFFFFF;};
+}
+function todaysWords() {
+  var d = new Date();
+  var seed = d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate();
+  var rand = seededRand(seed);
+  var idx = Array.from({length:ALL_WORDS.length},function(_,i){return i;});
+  for(var i=idx.length-1;i>0;i--){var j=Math.floor(rand()*(i+1));var t=idx[i];idx[i]=idx[j];idx[j]=t;}
+  return idx.slice(0,5).map(function(i){return ALL_WORDS[i];});
+}
+function getTodaysVocab() {
+  var words = todaysWords();
+  var allText = words.map(function(w){return w.en;}).join(' ').toLowerCase();
+  var found = [], added = {};
+  for(var i=0;i<VOCAB.length;i++){
+    var v = VOCAB[i];
+    var re = new RegExp('\\b'+v.key+'\\b');
+    if(re.test(allText) && !added[v.key]){ found.push(v); added[v.key]=1; }
+    if(found.length>=5) break;
+  }
+  return found;
+}
+
+// Play count
+function pcKey(){ var d=new Date(); return 'pc_'+d.getFullYear()+'_'+(d.getMonth()+1)+'_'+d.getDate(); }
+function loadPlayCount(){ var n=parseInt(localStorage.getItem(pcKey())||'0'); document.getElementById('play-count').textContent='本日練習：'+n+' 次'; }
+function incPlay(){ var k=pcKey(); var n=parseInt(localStorage.getItem(k)||'0')+1; localStorage.setItem(k,n); document.getElementById('play-count').textContent='本日練習：'+n+' 次'; }
+
+// Render words and vocab
+function renderWords() {
+  var ws = todaysWords();
+  document.getElementById('daily-words').innerHTML = ws.map(function(w,i){
+    return '<div class="wcard"><div class="wt"><div class="wen">'+esc(w.en)+'</div><div class="wzh">'+esc(w.zh)+'</div></div>'
+      +'<button class="wplay" id="wbtn'+i+'" onclick="playWord('+i+')">🔊</button></div>';
+  }).join('');
+}
+function renderVocab() {
+  var vs = getTodaysVocab();
+  var el = document.getElementById('daily-vocab');
+  if(!vs.length){ el.innerHTML='<div class="soft" style="font-size:15px;">今日句子沒有找到重點單字</div>'; return; }
+  el.innerHTML = vs.map(function(v,i){
+    return '<div class="vcard"><div class="wt"><div class="wen">'+esc(v.en)+'</div><div class="wzh">'+esc(v.zh)+'</div></div>'
+      +'<button class="wplay" id="vbtn'+i+'" onclick="playVocab('+i+')">🔊</button></div>';
+  }).join('');
+}
+
+// Speech play with token-based cancellation
+var _pt = 0, _stids = [], _playType = '', _playIdx = -1, _vocabIdx = -1;
+
+function stopAll() {
+  _pt++;
+  speechSynthesis.cancel();
+  _stids.forEach(function(id){ clearTimeout(id); });
+  _stids = [];
+  _playType = ''; _playIdx = -1; _vocabIdx = -1;
+  document.querySelectorAll('.wplay').forEach(function(b){ b.textContent='🔊'; });
+}
+
+function sayZh(t) { var u=new SpeechSynthesisUtterance(t);u.lang='zh-TW';u.rate=0.95;speechSynthesis.cancel();speechSynthesis.speak(u); }
+
+function playWord(idx) {
+  if (_playType==='word' && _playIdx===idx) { stopAll(); return; }
+  stopAll();
+  _playType='word'; _playIdx=idx;
+  var btn=document.getElementById('wbtn'+idx); if(btn)btn.textContent='⏸';
+  incPlay();
+  var w=todaysWords()[idx];
+  var tok=_pt;
+  var voices=speechSynthesis.getVoices();
+  var enV=voices.find(function(v){return v.lang==='en-US';})||voices.find(function(v){return v.lang&&v.lang.startsWith('en');});
+
+  function chk(){return _pt===tok;}
+  function lat(fn,ms){ if(!chk())return; var id=setTimeout(function(){if(chk())fn();},ms); _stids.push(id); }
+  function sp(text,lang,rate,voice,cb){
+    if(!chk())return;
+    var u=new SpeechSynthesisUtterance(text); u.lang=lang; u.rate=rate; u.pitch=1;
+    if(voice)u.voice=voice;
+    u.onend=function(){if(chk()&&cb)cb();};
+    speechSynthesis.speak(u);
+  }
+
+  // zh → 2s → en(0.5x full) → 2s → en word-by-word(0.5x,2s gap) → 2s → zh
+  sp(w.zh,'zh-TW',0.95,null,function(){
+    lat(function(){
+      sp(w.en,'en-US',0.5,enV,function(){
+        lat(function(){
+          var words=w.en.split(/\s+/); var wi=0;
+          function nw(){
+            if(!chk())return;
+            if(wi>=words.length){ lat(function(){ sp(w.zh,'zh-TW',0.95,null,function(){ if(chk()){stopAll();if(btn)btn.textContent='🔊';} }); },2000); return; }
+            sp(words[wi],'en-US',0.5,enV,function(){ wi++; lat(nw,2000); });
+          }
+          nw();
+        },2000);
+      });
+    },2000);
+  });
+}
+
+function playVocab(idx) {
+  if (_playType==='vocab' && _vocabIdx===idx) { stopAll(); return; }
+  stopAll();
+  _playType='vocab'; _vocabIdx=idx;
+  var btn=document.getElementById('vbtn'+idx); if(btn)btn.textContent='⏸';
+  incPlay();
+  var v=getTodaysVocab()[idx]; if(!v)return;
+  var tok=_pt;
+  var voices=speechSynthesis.getVoices();
+  var enV=voices.find(function(vx){return vx.lang==='en-US';})||voices.find(function(vx){return vx.lang&&vx.lang.startsWith('en');});
+
+  function chk(){return _pt===tok;}
+  function lat(fn,ms){ if(!chk())return; var id=setTimeout(function(){if(chk())fn();},ms); _stids.push(id); }
+  function sp(text,lang,rate,voice,cb){
+    if(!chk())return;
+    var u=new SpeechSynthesisUtterance(text); u.lang=lang; u.rate=rate; u.pitch=1;
+    if(voice)u.voice=voice;
+    u.onend=function(){if(chk()&&cb)cb();};
+    speechSynthesis.speak(u);
+  }
+
+  // zh → 1s → en(0.5x) → 2s → en(0.5x) → zh
+  sp(v.zh,'zh-TW',0.95,null,function(){
+    lat(function(){
+      sp(v.en,'en-US',0.5,enV,function(){
+        lat(function(){
+          sp(v.en,'en-US',0.5,enV,function(){
+            lat(function(){
+              sp(v.zh,'zh-TW',0.95,null,function(){
+                if(chk()){stopAll();if(btn)btn.textContent='🔊';}
+              });
+            },500);
+          });
+        },2000);
+      });
+    },1000);
+  });
+}
+
+// Conversation
+var engRec=null, engListen=false;
+var chatLog=[];
+
+function toggleEng() {
+  var btn=document.getElementById('eng-mic');
+  var st =document.getElementById('eng-st');
+  if(engListen&&engRec){ try{engRec.abort();}catch(e){} engListen=false;engRec=null;btn.className='mic idle';st.textContent='錄音已停止';return; }
+  var SR=getSR('en-US');
+  if(!SR){ st.textContent='這個瀏覽器不支援語音輸入'; return; }
+  engRec=SR; engListen=true;
+  btn.className='mic rec'; st.textContent='錄音中… 再點一下停止';
+  engRec.start();
+  engRec.onresult=async function(e){
+    var text=e.results[0][0].transcript;
+    engListen=false; try{engRec.abort();}catch(ex){} engRec=null;
+    btn.className='mic idle'; st.textContent='思考中…';
+    addBubble('me',text);
+    chatLog.push({role:'user',content:text});
+    if(chatLog.length>20)chatLog.splice(0,2);
+    var reply=await getEngReply();
+    addBubble('ai',reply);
+    chatLog.push({role:'assistant',content:reply});
+    var u=new SpeechSynthesisUtterance(reply);u.lang='en-US';u.rate=0.95;speechSynthesis.cancel();speechSynthesis.speak(u);
+    st.textContent='點一下開始說，再點一下停止';
+  };
+  engRec.onerror=function(e){ engListen=false;engRec=null;btn.className='mic idle';micErr(e,st); };
+  engRec.onend=function(){ engListen=false;engRec=null;btn.className='mic idle'; };
+}
+function addBubble(who,text){
+  var box=document.getElementById('chat-box');
+  var d=document.createElement('div'); d.className='bubble '+(who==='me'?'me':'ai');
+  d.textContent=text; box.appendChild(d); box.scrollTop=box.scrollHeight;
+}
+async function getEngReply(){
+  var r=await callAI(chatLog,'english_chat');
+  if(r)return r;
+  return pickFb(chatLog[chatLog.length-1]?chatLog[chatLog.length-1].content:'');
+}
+var FB={food:['That sounds delicious! What did you eat with it?','Yummy! Do you cook it yourself often?','I love that too. Was it spicy or mild?'],health:['That is great! How do you feel today?','Good for you! What healthy habits do you have?','Health is so important!'],family:['That is so nice! Who were you with?','Family time is precious. What did you do?','That sounds fun! Do you see them often?'],default:["That's really interesting! What happened next?","Oh nice! How did that make you feel?","Tell me more about that!","That sounds lovely. What are you planning to do later?"]};
+var _lastFb='';
+function pickFb(t){
+  var l=t.toLowerCase(); var pool;
+  if(/food|eat|rice|soup|fruit|tea|coffee|meal/.test(l)) pool=FB.food;
+  else if(/doctor|medicine|sick|pain|tired|rest|sleep|exercise/.test(l)) pool=FB.health;
+  else if(/family|son|daughter|husband|wife|grandchild/.test(l)) pool=FB.family;
+  else pool=FB.default;
+  var c=pool[Math.floor(Math.random()*pool.length)];
+  var tries=0; while(c===_lastFb&&tries<6){c=pool[Math.floor(Math.random()*pool.length)];tries++;}
+  _lastFb=c; return c;
+}
+
+/* ════════════════════════════════════════
+   NOTIFICATIONS
+════════════════════════════════════════ */
+function initNotifToggles(){
+  setTgl('tgl-eng', localStorage.getItem('notif-eng')==='1');
+  setTgl('tgl-acc', localStorage.getItem('notif-acc')==='1');
+  if(Notification&&Notification.permission==='granted'){
+    if(localStorage.getItem('notif-eng')==='1') schedNotif('eng',9,0,'🗣️ 英語練習時間！','今天的英語練習還沒做，快來練習吧！');
+    if(localStorage.getItem('notif-acc')==='1') schedNotif('acc',20,30,'💰 記帳提醒','今天的花費記了嗎？');
+  }
+}
+function setTgl(id,on){ var b=document.getElementById(id); if(b)b.className='tgl '+(on?'on':'off'); }
+async function toggleNotif(type){
+  var key='notif-'+type;
+  var cur=localStorage.getItem(key)==='1';
+  var nm=document.getElementById('notif-msg');
+  if(!cur){
+    if(!('Notification' in window)){ nm.textContent='❌ 您的瀏覽器不支援通知'; return; }
+    if(Notification.permission==='default'){ var p=await Notification.requestPermission(); if(p!=='granted'){nm.textContent='❌ 通知權限被拒絕';return;} }
+    if(Notification.permission==='denied'){nm.textContent='❌ 通知已被封鎖，請到手機設定開啟';return;}
+    localStorage.setItem(key,'1'); setTgl('tgl-'+type,true);
+    if(type==='eng') schedNotif('eng',9,0,'🗣️ 英語練習時間！','今天的英語練習還沒做，快來練習吧！');
+    else schedNotif('acc',20,30,'💰 記帳提醒','今天的花費記了嗎？');
+    nm.textContent='✅ 提醒已開啟！';
+  } else {
+    localStorage.removeItem(key); setTgl('tgl-'+type,false); nm.textContent='提醒已關閉。';
+  }
+}
+function schedNotif(type,h,m,title,body){
+  var now=new Date(), today=now.toDateString(), k='nf_'+type+'_'+today;
+  if(localStorage.getItem(k)) return;
+  var target=new Date(now); target.setHours(h,m,0,0);
+  var delay=target-now;
+  function show(){ if(Notification.permission==='granted'){new Notification(title,{body:body});} localStorage.setItem(k,'1'); }
+  if(delay<=0) show();
+  else setTimeout(show, delay);
+}
+
+/* ════════════════════════════════════════
+   ALBUM
+════════════════════════════════════════ */
+async function compressImg(file, maxKB) {
+  maxKB = maxKB || 900;
+  return new Promise(function(res){
+    var reader=new FileReader();
+    reader.onload=function(e){
+      var img=new Image();
+      img.onload=function(){
+        var w=img.width,h=img.height,MAX=1600;
+        if(w>MAX||h>MAX){var s=Math.min(MAX/w,MAX/h);w=Math.round(w*s);h=Math.round(h*s);}
+        var canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
+        canvas.getContext('2d').drawImage(img,0,0,w,h);
+        var q=0.85,dataUrl=canvas.toDataURL('image/jpeg',q);
+        while(dataUrl.length*0.75>maxKB*1024&&q>0.3){q-=0.1;dataUrl=canvas.toDataURL('image/jpeg',q);}
+        res(dataUrl);
+      };
+      img.src=e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function getVideoDuration(file){
+  return new Promise(function(resolve){
+    var v=document.createElement('video'); v.preload='metadata';
+    v.onloadedmetadata=function(){URL.revokeObjectURL(v.src);resolve(v.duration);};
+    v.onerror=function(){resolve(0);};
+    v.src=URL.createObjectURL(file);
+  });
+}
+
+function onPhotoSel(input){
+  var file=input.files[0]; if(!file)return;
+  document.getElementById('photo-btn').textContent='✅ 已選好照片了';
+}
+
+async function onVideoSel(input){
+  var file=input.files[0]; if(!file)return;
+  var dur=await getVideoDuration(file);
+  if(dur>10){
+    alert('影片時長過長，請拍攝十秒內影片');
+    input.value=''; return;
+  }
+  if(file.size>5*1024*1024){
+    alert('影片檔案太大（'+Math.round(file.size/1024/1024*10)/10+'MB），請拍攝較短的影片');
+    input.value=''; return;
+  }
+  var b64=await fileToB64(file);
+  document.getElementById('vid-data').value=b64;
+  var prev=document.getElementById('vid-preview');
+  prev.src=URL.createObjectURL(file);
+  prev.style.display='block';
+  document.getElementById('video-btn').style.display='none';
+  document.getElementById('cancel-vid-btn').style.display='flex';
+}
+
+function cancelVideo(){
+  document.getElementById('vid-data').value='';
+  document.getElementById('alb-video').value='';
+  var prev=document.getElementById('vid-preview');
+  prev.style.display='none'; prev.src='';
+  document.getElementById('cancel-vid-btn').style.display='none';
+  document.getElementById('video-btn').style.display='flex';
+}
+
+var albItems=[];
+
+async function postAlbum(){
+  var textEl=document.getElementById('alb-text');
+  var photoEl=document.getElementById('alb-photo');
+  var vidData=document.getElementById('vid-data').value;
+  var text=textEl.value.trim();
+  var photoFile=photoEl.files[0];
+  if(!text&&!photoFile&&!vidData){ alert('請輸入文字、選擇照片或拍攝影片'); return; }
+  var photoData=null;
+  if(photoFile) photoData=await compressImg(photoFile,900);
+  var expiresAt=new Date(Date.now()+24*60*60*1000).toISOString();
+  var row={id:'alb_'+Date.now(),text_content:text||null,photo:photoData||null,video:vidData||null,profile:who,expires_at:expiresAt};
+  var r=await sb.from('album_posts').insert(row);
+  if(r.error){ console.error(r.error); alert('分享失敗，請再試一次（'+JSON.stringify(r.error)+')'); return; }
+  // reset form
+  textEl.value=''; photoEl.value=''; document.getElementById('photo-btn').textContent='🖼️　選擇或拍攝照片';
+  cancelVideo();
+  // optimistic update
+  var newItem=Object.assign({},row,{created_at:new Date().toISOString()});
+  if(!albItems.length){ loadAlbum(); }
+  else { albItems.unshift(newItem); renderAlbum(); }
+}
+
+async function loadAlbum(){
+  var el=document.getElementById('alb-list');
+  el.innerHTML='<div class="loading">載入中⋯</div>';
+  if(!sb){document.getElementById('alb-list').innerHTML='<div class="empty">資料庫未連線</div>';return;}
+  var now=new Date().toISOString();
+  var r=await sb.from('album_posts').select('*').gt('expires_at',now).order('created_at',{ascending:false}).limit(30);
+  sb.from('album_posts').delete().lt('expires_at',now).then(function(){});
+  albItems=r.data||[];
+  renderAlbum();
+}
+
+function renderAlbum(){
+  var el=document.getElementById('alb-list');
+  if(!albItems.length){el.innerHTML='<div class="empty">目前還沒有分享內容</div>';return;}
+  el.innerHTML=albItems.map(function(it,idx){
+    var d=new Date(it.created_at);
+    var ds=d.getFullYear()+'/'
+      +String(d.getMonth()+1).padStart(2,'0')+'/'
+      +String(d.getDate()).padStart(2,'0')+' '
+      +String(d.getHours()).padStart(2,'0')+':'
+      +String(d.getMinutes()).padStart(2,'0');
+    var hl=Math.max(0,Math.round((new Date(it.expires_at)-new Date())/3600000));
+    var vidHtml='';
+    if(it.video){
+      var mt=it.video.match(/^data:(video\/[^;]+)/);
+      var mime=mt?mt[1]:'video/mp4';
+      vidHtml='<div onclick="openVideoOverlay('+idx+')" style="position:relative;cursor:pointer;margin-top:8px;">'
+        +'<video style="width:100%;border-radius:12px;pointer-events:none;" muted playsinline preload="metadata">'
+        +'<source src="'+it.video+'" type="'+mime+'">'
+        +'<source src="'+it.video+'" type="video/mp4"></video>'
+        +'<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;border-radius:12px;background:rgba(0,0,0,.3);">'
+        +'<span style="font-size:52px;">▶️</span></div></div>'
+        +'<a class="dnl" href="'+it.video+'" download="video_'+it.id+'.mp4">⬇️ 下載影片</a>';
+    }
+    return '<div class="alb-item">'
+      +'<span class="ntag">'+esc(it.profile)+'</span> '
+      +'<span class="soft" style="font-size:14px;">'+ds+'（還有 '+hl+' 小時）</span>'
+      +(it.text_content?'<div style="margin-top:7px;">'+esc(it.text_content)+'</div>':'')
+      +(it.photo?'<img src="'+it.photo+'" alt="照片" onclick="openPhoto('+idx+')">'
+        +'<a class="dnl" href="'+it.photo+'" download="photo_'+it.id+'.jpg">⬇️ 下載照片</a>':'')
+      +vidHtml
+      +'</div>';
+  }).join('');
+}
+
+function openPhoto(idx){ var it=albItems[idx];if(!it||!it.photo)return;document.getElementById('po-img').src=it.photo;document.getElementById('photo-overlay').style.display='flex'; }
+function closePhoto(){ document.getElementById('photo-overlay').style.display='none'; }
+function openVideoOverlay(idx){
+  var it=albItems[idx]; if(!it||!it.video)return;
+  var ov=document.getElementById('video-overlay');
+  var vid=document.getElementById('vo-vid');
+  vid.innerHTML='';
+  var mt=it.video.match(/^data:(video\/[^;]+)/);
+  var mime=mt?mt[1]:'video/mp4';
+  var s1=document.createElement('source');s1.src=it.video;s1.type=mime;
+  var s2=document.createElement('source');s2.src=it.video;s2.type='video/mp4';
+  vid.appendChild(s1);vid.appendChild(s2);
+  vid.load(); vid.play().catch(function(){});
+  ov.style.display='flex';
+}
+function closeVideoOverlay(e){
+  if(e&&e.target!==document.getElementById('video-overlay')&&e.target!==document.querySelector('#video-overlay button'))return;
+  var vid=document.getElementById('vo-vid'); vid.pause(); vid.src=''; vid.innerHTML='';
+  document.getElementById('video-overlay').style.display='none';
+}
+</script>
+</body>
+</html>
