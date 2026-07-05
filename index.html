@@ -507,51 +507,76 @@ function toggleAcc() {
   var btn = document.getElementById('acc-mic');
   var st  = document.getElementById('acc-st');
   if (accListen && accRec) {
-    try { accRec.abort(); } catch(e){}
+    try { accRec.stop(); } catch(e){}
     accListen = false; accRec = null;
     btn.className = 'mic idle'; st.textContent = '錄音已停止'; return;
   }
-  var SR = getSR('zh-TW');
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SR) { st.textContent = '這個瀏覽器不支援語音輸入'; return; }
-  accRec = SR; accListen = true;
-  btn.className = 'mic rec'; st.textContent = '錄音中… 再點一下停止';
+  accRec = new SR();
+  accRec.lang = 'zh-TW';
+  accRec.continuous = false;
+  accRec.interimResults = true;
+  accRec.maxAlternatives = 1;
+  accListen = true;
+  btn.className = 'mic rec';
+  st.textContent = '錄音中… 再點一下停止';
   accRec.start();
   accRec.onresult = function(e) {
-    var text = e.results[0][0].transcript;
-    accListen = false; try { accRec.abort(); } catch(ex){}
-    accRec = null; btn.className = 'mic idle';
-    st.textContent = '聽到：「'+text+'」　AI 分析中…';
-    processAccVoice(text, btn, st);
+    var interim = '', finalText = '';
+    for (var k = e.resultIndex; k < e.results.length; k++) {
+      if (e.results[k].isFinal) finalText += e.results[k][0].transcript;
+      else interim += e.results[k][0].transcript;
+    }
+    if (interim) st.textContent = '聽到：「' + interim + '」…';
+    if (finalText) {
+      accListen = false;
+      try { accRec.stop(); } catch(ex){}
+      accRec = null;
+      btn.className = 'mic idle';
+      st.textContent = '聽到：「' + finalText + '」　分析中…';
+      processAccVoice(finalText, btn, st);
+    }
   };
-  accRec.onerror = function(e){
-    accListen = false; accRec = null; btn.className = 'mic idle'; micErr(e, st);
+  accRec.onerror = function(e) {
+    accListen = false; accRec = null;
+    btn.className = 'mic idle'; micErr(e, st);
   };
-  accRec.onend = function(){
-    accListen = false; accRec = null; btn.className = 'mic idle';
+  accRec.onend = function() {
+    accListen = false; accRec = null;
+    btn.className = 'mic idle';
   };
 }
 
 async function processAccVoice(text, btn, st) {
+  // Local parsing as immediate backup
+  var localAmt = extractAmt(text);
+  var localCat = guessCategory(text);
   var amount = null, category = '其他', desc = text;
-  var ai = await callAI([{role:'user',content:text}], 'classify_expense');
-  if (ai) {
+  // Try AI with 3-second timeout
+  if (sb) {
     try {
-      var p = JSON.parse(ai.replace(/```json|```/g,'').trim());
-      amount = p.amount; category = p.category || '其他'; desc = p.desc || text;
-    } catch(e) { amount = extractAmt(text); category = guessCategory(text); }
-  } else {
-    amount = extractAmt(text); category = guessCategory(text);
-  }
+      var aiRes = await Promise.race([
+        callAI([{role:'user',content:text}], 'classify_expense'),
+        new Promise(function(r){ setTimeout(function(){r(null);}, 3000); })
+      ]);
+      if (aiRes) {
+        try {
+          var p = JSON.parse(aiRes.replace(/```json|```/g,'').trim());
+          amount = p.amount; category = p.category||'其他'; desc = p.desc||text;
+        } catch(e) { amount = localAmt; category = localCat; }
+      } else { amount = localAmt; category = localCat; }
+    } catch(e) { amount = localAmt; category = localCat; }
+  } else { amount = localAmt; category = localCat; }
   if (amount) {
-    await sb.from('accounts').insert({
-      id: 'acc_'+Date.now(), amount: amount, category: category,
-      raw: desc, profile: who
-    });
-    st.textContent = '已記錄：'+category+'　'+amount+'元';
-    sayZh('已幫您記錄，'+category+'類，花了'+amount+'元');
-    loadAcc();
+    try {
+      await sb.from('accounts').insert({id:'acc_'+Date.now(),amount:amount,category:category,raw:desc,profile:who});
+      st.textContent = '已記錄：'+category+'　'+amount+'元';
+      sayZh('已幫您記錄，'+category+'類，花了'+amount+'元');
+      loadAcc();
+    } catch(e) { st.textContent = '儲存失敗，請再試一次'; }
   } else {
-    st.textContent = '沒有聽清楚金額，請再說一次';
+    st.textContent = '沒有聽清楚金額，請再說一次，例如「買菜花了三百元」';
     sayZh('沒有聽清楚金額，麻煩再說一次');
   }
 }
