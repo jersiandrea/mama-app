@@ -546,12 +546,12 @@ async function processAccVoice(text, btn, st) {
   var localAmt = extractAmt(text);
   var localCat = guessCategory(text);
   var amount = null, category = '其他', desc = text;
-  // Try AI with 3-second timeout
+  // Try AI with 8-second timeout (API from Taiwan needs more time)
   if (sb) {
     try {
       var aiRes = await Promise.race([
         callAI([{role:'user',content:text}], 'classify_expense'),
-        new Promise(function(r){ setTimeout(function(){r(null);}, 3000); })
+        new Promise(function(r){ setTimeout(function(){r(null);}, 8000); })
       ]);
       if (aiRes) {
         try {
