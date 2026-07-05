@@ -486,13 +486,16 @@ function micErr(e, el) {
    AI CALL
 ════════════════════════════════════════ */
 async function callAI(messages, task) {
+  if(!sb){ console.warn('Supabase not initialized'); return null; }
   try {
-    if (!sb) { console.warn('Supabase not initialized'); return null; }
-    var res = await sb.functions.invoke('ai-proxy', { body: { messages: messages, task: task } });
-    if (res.error) { console.error('AI error', res.error); return null; }
-    var d = res.data;
-    if (!d || !d.content) return null;
-    var b = d.content.find(function(x){ return x.type==='text'; });
+    var timeout=new Promise(function(resolve){ setTimeout(function(){ resolve(null); }, 8000); });
+    var call=sb.functions.invoke('ai-proxy', { body: { messages: messages, task: task } });
+    var res=await Promise.race([call, timeout]);
+    if(!res){ console.log('AI timeout'); return null; }
+    if(res.error){ console.error('AI error', res.error); return null; }
+    var d=res.data;
+    if(!d||!d.content) return null;
+    var b=d.content.find(function(x){ return x.type==='text'; });
     return b ? b.text.trim() : null;
   } catch(e) { console.error('callAI:', e); return null; }
 }
@@ -692,7 +695,8 @@ var VOCAB=[{key:'delicious',en:'delicious',zh:'美味的'},{key:'medicine',en:'m
 
 function seededRand(seed) {
   var s = seed|0;
-  return function(){s=Math.imul(s^(s>>>16),0x45d9f3b);s=Math.imul(s^(s>>>16),0x45d9f3b);s=s^(s>>>16);return(s>>>0)/0xFFFFFFFF;};
+  var imul = Math.imul || function(a,b){ var ah=(a>>>16)&0xffff,al=a&0xffff,bh=(b>>>16)&0xffff,bl=b&0xffff;return((al*bl)+(((ah*bl+al*bh)<<16)>>>0)|0); };
+  return function(){ s=imul(s^(s>>>16),0x45d9f3b); s=imul(s^(s>>>16),0x45d9f3b); s=s^(s>>>16); return(s>>>0)/0xFFFFFFFF; };
 }
 function todaysWords() {
   var d = new Date();
@@ -722,20 +726,28 @@ function incPlay(){ var k=pcKey(); var n=parseInt(localStorage.getItem(k)||'0')+
 
 // Render words and vocab
 function renderWords() {
-  var ws = todaysWords();
-  document.getElementById('daily-words').innerHTML = ws.map(function(w,i){
-    return '<div class="wcard"><div class="wt"><div class="wen">'+esc(w.en)+'</div><div class="wzh">'+esc(w.zh)+'</div></div>'
-      +'<button class="wplay" id="wbtn'+i+'" onclick="playWord('+i+')">🔊</button></div>';
-  }).join('');
+  var el=document.getElementById('daily-words');
+  if(!el)return;
+  try{
+    var ws=todaysWords();
+    if(!ws||!ws.length){el.innerHTML='<div class="soft">句子載入中...</div>';return;}
+    el.innerHTML=ws.map(function(w,i){
+      return '<div class="wcard"><div class="wt"><div class="wen">'+esc(w.en)+'</div><div class="wzh">'+esc(w.zh)+'</div></div>'
+        +'<button class="wplay" id="wbtn'+i+'" onclick="playWord('+i+')">🔊</button></div>';
+    }).join('');
+  }catch(e){console.error('renderWords:',e);el.innerHTML='<div class="soft">載入失敗，請重新整理</div>';}
 }
 function renderVocab() {
-  var vs = getTodaysVocab();
-  var el = document.getElementById('daily-vocab');
-  if(!vs.length){ el.innerHTML='<div class="soft" style="font-size:15px;">今日句子沒有找到重點單字</div>'; return; }
-  el.innerHTML = vs.map(function(v,i){
-    return '<div class="vcard"><div class="wt"><div class="wen">'+esc(v.en)+'</div><div class="wzh">'+esc(v.zh)+'</div></div>'
-      +'<button class="wplay" id="vbtn'+i+'" onclick="playVocab('+i+')">🔊</button></div>';
-  }).join('');
+  var el=document.getElementById('daily-vocab');
+  if(!el)return;
+  try{
+    var vs=getTodaysVocab();
+    if(!vs||!vs.length){el.innerHTML='<div class="soft" style="font-size:15px;">今日句子沒有找到重點單字</div>';return;}
+    el.innerHTML=vs.map(function(v,i){
+      return '<div class="vcard"><div class="wt"><div class="wen">'+esc(v.en)+'</div><div class="wzh">'+esc(v.zh)+'</div></div>'
+        +'<button class="wplay" id="vbtn'+i+'" onclick="playVocab('+i+')">🔊</button></div>';
+    }).join('');
+  }catch(e){console.error('renderVocab:',e);}
 }
 
 // Speech play with token-based cancellation
@@ -853,11 +865,12 @@ function toggleEng() {
   engRec.onresult=async function(e){
     var text=e.results[0][0].transcript;
     engListen=false; try{engRec.abort();}catch(ex){} engRec=null;
-    btn.className='mic idle'; st.textContent='思考中…';
+    btn.className='mic idle'; st.textContent='AI 思考中（最多等 8 秒）…';
     addBubble('me',text);
     chatLog.push({role:'user',content:text});
     if(chatLog.length>20)chatLog.splice(0,2);
     var reply=await getEngReply();
+    if(!reply){ reply=pickFb(text); }
     addBubble('ai',reply);
     chatLog.push({role:'assistant',content:reply});
     var u=new SpeechSynthesisUtterance(reply);
