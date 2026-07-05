@@ -516,27 +516,20 @@ function toggleAcc() {
   accRec = new SR();
   accRec.lang = 'zh-TW';
   accRec.continuous = false;
-  accRec.interimResults = true;
+  accRec.interimResults = false;
   accRec.maxAlternatives = 1;
   accListen = true;
   btn.className = 'mic rec';
-  st.textContent = '錄音中… 再點一下停止';
+  st.textContent = '請說一句話，例如「去家樂福買菜花了三百元」';
   accRec.start();
   accRec.onresult = function(e) {
-    var interim = '', finalText = '';
-    for (var k = e.resultIndex; k < e.results.length; k++) {
-      if (e.results[k].isFinal) finalText += e.results[k][0].transcript;
-      else interim += e.results[k][0].transcript;
-    }
-    if (interim) st.textContent = '聽到：「' + interim + '」…';
-    if (finalText) {
-      accListen = false;
-      try { accRec.stop(); } catch(ex){}
-      accRec = null;
-      btn.className = 'mic idle';
-      st.textContent = '聽到：「' + finalText + '」　分析中…';
-      processAccVoice(finalText, btn, st);
-    }
+    var text = e.results[0][0].transcript;
+    accListen = false;
+    try { accRec.stop(); } catch(ex){}
+    accRec = null;
+    btn.className = 'mic idle';
+    st.textContent = '聽到：「' + text + '」　分析中…';
+    processAccVoice(text, btn, st);
   };
   accRec.onerror = function(e) {
     accListen = false; accRec = null;
