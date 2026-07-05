@@ -840,6 +840,13 @@ function toggleEng() {
   if(engListen&&engRec){ try{engRec.abort();}catch(e){} engListen=false;engRec=null;btn.className='mic idle';st.textContent='錄音已停止';return; }
   var SR=getSR('en-US');
   if(!SR){ st.textContent='這個瀏覽器不支援語音輸入'; return; }
+  // 在使用者點擊的當下解鎖語音合成（iOS Safari 需要）
+  try {
+    speechSynthesis.cancel();
+    var unlock=new SpeechSynthesisUtterance('');
+    unlock.volume=0; unlock.lang='en-US';
+    speechSynthesis.speak(unlock);
+  } catch(e) {}
   engRec=SR; engListen=true;
   btn.className='mic rec'; st.textContent='錄音中… 再點一下停止';
   engRec.start();
@@ -853,7 +860,10 @@ function toggleEng() {
     var reply=await getEngReply();
     addBubble('ai',reply);
     chatLog.push({role:'assistant',content:reply});
-    var u=new SpeechSynthesisUtterance(reply);u.lang='en-US';u.rate=0.95;speechSynthesis.cancel();speechSynthesis.speak(u);
+    var u=new SpeechSynthesisUtterance(reply);
+    u.lang='en-US'; u.rate=0.95;
+    speechSynthesis.cancel();
+    setTimeout(function(){ speechSynthesis.speak(u); }, 100);
     st.textContent='點一下開始說，再點一下停止';
   };
   engRec.onerror=function(e){ engListen=false;engRec=null;btn.className='mic idle';micErr(e,st); };
