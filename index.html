@@ -374,42 +374,40 @@ if (sessionStorage.getItem('ok') === '1') {
 var who = '認真復健的火雞媽媽🦃';
 
 function initApp() {
-  var d = new Date();
-  var wd = ['日','一','二','三','四','五','六'];
-  document.getElementById('greet').textContent = d.getHours()<11?'早安！':d.getHours()<18?'午安！':'晚安！';
-  document.getElementById('dateline').textContent =
-    d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日　星期'+wd[d.getDay()];
-
-  who = localStorage.getItem('who') || '認真復健的火雞媽媽🦃';
-  document.getElementById('who-sel').value = who;
-
-  // year dropdown
   try {
+    var d = new Date();
+    var wd = ['日','一','二','三','四','五','六'];
+    var h = d.getHours();
+    var ge = document.getElementById('greet');
+    if(ge) ge.textContent = h<11?'早安！':h<18?'午安！':'晚安！';
+    var de = document.getElementById('dateline');
+    if(de) de.textContent = d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日　星期'+wd[d.getDay()];
+    who = localStorage.getItem('who') || '認真復健的火雞媽媽🦃';
+    var we = document.getElementById('who-sel'); if(we) we.value = who;
     var yrEl = document.getElementById('sp-yr');
-    if (yrEl) {
+    if(yrEl){
       yrEl.innerHTML = '';
-      for (var y = d.getFullYear(); y >= d.getFullYear()-3; y--) {
-        var o = document.createElement('option');
-        o.value = y; o.textContent = y+'年';
-        if (y === d.getFullYear()) o.selected = true;
-        yrEl.appendChild(o);
+      for(var y=d.getFullYear();y>=d.getFullYear()-3;y--){
+        var o=document.createElement('option');o.value=y;o.textContent=y+'年';
+        if(y===d.getFullYear())o.selected=true;yrEl.appendChild(o);
       }
     }
     var moEl = document.getElementById('sp-mo');
-    if (moEl) moEl.value = d.getMonth()+1;
-  } catch(e) { console.warn('Year dropdown init error:', e); }
+    if(moEl) moEl.value = d.getMonth()+1;
+  } catch(e) { console.warn('initApp header error:', e); }
 
-  initNotifToggles();
-  loadPlayCount();
-  renderWords();
-  renderVocab();
-  loadAcc();
-  loadAlbum();
-
-  if (typeof speechSynthesis !== 'undefined') {
-    speechSynthesis.getVoices();
-    speechSynthesis.onvoiceschanged = function(){ speechSynthesis.getVoices(); };
-  }
+  try { initNotifToggles(); } catch(e) { console.warn('notif error:', e); }
+  try { loadPlayCount(); } catch(e) { console.warn('playcount error:', e); }
+  try { renderWords(); } catch(e) { console.error('renderWords error:', e); }
+  try { renderVocab(); } catch(e) { console.error('renderVocab error:', e); }
+  try { loadAcc(); } catch(e) { console.warn('loadAcc error:', e); }
+  try { loadAlbum(); } catch(e) { console.warn('loadAlbum error:', e); }
+  try {
+    if(typeof speechSynthesis!=='undefined'){
+      speechSynthesis.getVoices();
+      speechSynthesis.onvoiceschanged=function(){speechSynthesis.getVoices();};
+    }
+  } catch(e) {}
 }
 
 if (sessionStorage.getItem('ok') === '1') { initApp(); }
@@ -488,7 +486,7 @@ function micErr(e, el) {
 async function callAI(messages, task) {
   if(!sb){ console.warn('Supabase not initialized'); return null; }
   try {
-    var timeout=new Promise(function(resolve){ setTimeout(function(){ resolve(null); }, 8000); });
+    var timeout=new Promise(function(resolve){ setTimeout(function(){ resolve(null); }, 5000); });
     var call=sb.functions.invoke('ai-proxy', { body: { messages: messages, task: task } });
     var res=await Promise.race([call, timeout]);
     if(!res){ console.log('AI timeout'); return null; }
@@ -694,17 +692,22 @@ var ALL_WORDS=[{en:"I'd like some rice, please.",zh:"我想要一些飯。"},{en
 var VOCAB=[{key:'delicious',en:'delicious',zh:'美味的'},{key:'medicine',en:'medicine',zh:'藥'},{key:'vegetable',en:'vegetable',zh:'蔬菜'},{key:'noodles',en:'noodles',zh:'麵條'},{key:'breakfast',en:'breakfast',zh:'早餐'},{key:'hungry',en:'hungry',zh:'餓的'},{key:'favorite',en:'favorite',zh:'最喜歡的'},{key:'exercise',en:'exercise',zh:'運動'},{key:'appointment',en:'appointment',zh:'預約'},{key:'pressure',en:'pressure',zh:'血壓/壓力'},{key:'vitamin',en:'vitamin',zh:'維他命'},{key:'appetite',en:'appetite',zh:'食慾'},{key:'important',en:'important',zh:'重要的'},{key:'dizzy',en:'dizzy',zh:'頭暈的'},{key:'sore',en:'sore',zh:'酸痛的'},{key:'daughter',en:'daughter',zh:'女兒'},{key:'grandchild',en:'grandchild',zh:'孫子/孫女'},{key:'husband',en:'husband',zh:'先生/丈夫'},{key:'planning',en:'planning',zh:'計劃'},{key:'together',en:'together',zh:'一起'},{key:'yesterday',en:'yesterday',zh:'昨天'},{key:'tonight',en:'tonight',zh:'今晚'},{key:'tomorrow',en:'tomorrow',zh:'明天'},{key:'expensive',en:'expensive',zh:'昂貴的'},{key:'discount',en:'discount',zh:'折扣'},{key:'receipt',en:'receipt',zh:'收據'},{key:'quality',en:'quality',zh:'品質'},{key:'umbrella',en:'umbrella',zh:'雨傘'},{key:'evening',en:'evening',zh:'傍晚/晚上'},{key:'throat',en:'throat',zh:'喉嚨'},{key:'slowly',en:'slowly',zh:'慢慢地'},{key:'bathroom',en:'bathroom',zh:'廁所/浴室'},{key:'usually',en:'usually',zh:'通常'},{key:'strong',en:'strong',zh:'強/濃的'}];
 
 function seededRand(seed) {
-  var s = seed|0;
-  var imul = Math.imul || function(a,b){ var ah=(a>>>16)&0xffff,al=a&0xffff,bh=(b>>>16)&0xffff,bl=b&0xffff;return((al*bl)+(((ah*bl+al*bh)<<16)>>>0)|0); };
-  return function(){ s=imul(s^(s>>>16),0x45d9f3b); s=imul(s^(s>>>16),0x45d9f3b); s=s^(s>>>16); return(s>>>0)/0xFFFFFFFF; };
+  // Park-Miller LCG - no Math.imul needed, works everywhere
+  var s = Math.abs(seed % 2147483647) || 1;
+  return function(){ s=(s*16807)%2147483647; return(s-1)/2147483646; };
 }
 function todaysWords() {
-  var d = new Date();
-  var seed = d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate();
-  var rand = seededRand(seed);
-  var idx = Array.from({length:ALL_WORDS.length},function(_,i){return i;});
-  for(var i=idx.length-1;i>0;i--){var j=Math.floor(rand()*(i+1));var t=idx[i];idx[i]=idx[j];idx[j]=t;}
-  return idx.slice(0,5).map(function(i){return ALL_WORDS[i];});
+  try {
+    var d=new Date();
+    var seed=d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate();
+    var rand=seededRand(seed);
+    var idx=[];
+    for(var k=0;k<ALL_WORDS.length;k++) idx.push(k);
+    for(var i=idx.length-1;i>0;i--){var j=Math.floor(rand()*(i+1));var t=idx[i];idx[i]=idx[j];idx[j]=t;}
+    var result=[];
+    for(var m=0;m<5;m++) result.push(ALL_WORDS[idx[m]]);
+    return result;
+  } catch(e) { console.error('todaysWords error:',e); return ALL_WORDS.slice(0,5); }
 }
 function getTodaysVocab() {
   var words = todaysWords();
@@ -934,13 +937,15 @@ async function toggleNotif(type){
   }
 }
 function schedNotif(type,h,m,title,body){
-  var now=new Date(), today=now.toDateString(), k='nf_'+type+'_'+today;
-  if(localStorage.getItem(k)) return;
-  var target=new Date(now); target.setHours(h,m,0,0);
-  var delay=target-now;
-  function show(){ if(Notification.permission==='granted'){new Notification(title,{body:body});} localStorage.setItem(k,'1'); }
-  if(delay<=0) show();
-  else setTimeout(show, delay);
+  try {
+    var now=new Date(), today=now.toDateString(), k='nf_'+type+'_'+today;
+    if(localStorage.getItem(k)) return;
+    var target=new Date(now); target.setHours(h,m,0,0);
+    var delay=target-now;
+    function show(){ try{if(Notification.permission==='granted'){new Notification(title,{body:body});}}catch(e){} localStorage.setItem(k,'1'); }
+    if(delay<=0) show();
+    else setTimeout(show, delay);
+  } catch(e) { console.warn('schedNotif error:', e); }
 }
 
 /* ════════════════════════════════════════
