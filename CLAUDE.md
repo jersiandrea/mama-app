@@ -2,45 +2,37 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Primary user & non-negotiable UI constraint
+## The picture in one paragraph
 
-The primary (real-world) user of this app is the developer's mother, who has poor eyesight. **Every UI change must preserve large fonts, high contrast, and large buttons — this is the highest-priority constraint and must never be compromised**, even for changes that seem like minor visual polish or "cleanup." Never shrink font sizes, tighten tap targets, or lower contrast (e.g. `--soft` text on `--card`/`--bg`) to fit more content or match a "cleaner" design — reflow or restructure instead.
+「媽媽的好幫手」(Mom's Helper): a Traditional-Chinese family app whose primary real-world user is the developer's mother, who has poor eyesight. The entire app is ONE file — `index.html` (~1,100 lines: CSS + HTML + vanilla ES5 JS) — backed by a Supabase project plus one Supabase Edge Function (`ai-proxy`, lives outside this repo). Pushing to `main` deploys it live to https://jersiandrea.github.io/mama-app via GitHub Pages — no CI, no staging, no tests.
 
-## Workflow requirement
+## Non-negotiable rules
 
-Before implementing any change to functionality, confirm your understanding of the request with the user first and get their go-ahead — do not start editing `index.html` immediately on request.
+1. **Accessibility first, always.** Never reduce any font size, contrast, or button/tap-target size, for any reason (base font is 20px; big action buttons are 22px). If a change needs more room, reflow or restructure — never shrink or tighten.
+2. **Confirm before coding.** Before implementing any functional change, restate your understanding to the user and get her go-ahead. (Edits to `docs/*.md` usually don't need this — except the cases listed in `docs/maintenance.md` § "Ask the user BEFORE".)
+3. **Never `git push` without explicit authorization given in the current conversation.** A past session's go-ahead does not carry over. Push = instant production deploy to mom's phone. Local commits are fine when asked.
+4. **No new tooling, ever.** No package.json, no build step, no framework, no TypeScript, no splitting `index.html` into modules or extra JS/CSS files. All app code stays in `index.html` in the existing style: `var`/`function`, string concatenation; `async`/`await` and Promises are already used there and are fine — do not "downgrade" them. No arrow functions, template literals, classes, or modules. Markdown under `docs/` is the only sanctioned place for new files.
+5. **UI text is Traditional Chinese**, warm and simple, written for an older non-technical user (e.g.「點一下開始說話，再點一下停止」). Match that voice in any new copy.
 
-## Deployment
+## Working in index.html
 
-Deployment is push-to-deploy: pushing to the `main` branch on GitHub triggers GitHub Pages to auto-deploy `index.html` to https://jersiandrea.github.io/mama-app. There is no staging environment or CI test gate — anything pushed to `main` goes live immediately, so treat pushes to `main` with the same caution as a production deploy (confirm with the user before pushing, per the workflow requirement above).
+Do not read the whole file to find things. The JS is divided by banner comments; locate sections with:
 
-## What this is
+```
+grep -n -A1 "════" index.html
+```
 
-「媽媽的好幫手」(Mom's Helper) — a single-file, PIN-gated PWA-style web app for a family, in Traditional Chinese. It has no build step, no package manager, and no test suite: the entire app (markup, CSS, and JS) lives in `index.html` and is deployed by simply uploading/serving that file as a static site (commit history is literally "Add files via upload"). There is no local dev server config — open/serve `index.html` directly to work on it.
+(The section name sits on the line *after* the first `════` border — without `-A1` you get bare line numbers and no names.) Sections in order: CONFIG · PIN GATE · APP INIT · TAB NAVIGATION · UTILITIES · VOICE HELPERS · AI CALL · ACCOUNTING · ENGLISH LEARNING · NOTIFICATIONS · ALBUM. Read only the range you need. Structure, data model, and quirks: `docs/architecture.md`.
 
-Backend is a Supabase project (`SB_URL`/`SB_KEY` hardcoded near the top of the `<script>` block) using the public/anon key directly from client-side JS, plus one Supabase Edge Function (`ai-proxy`, not in this repo) that proxies calls to an AI model for expense classification and English conversation replies.
+After editing JS, run the syntax check in `docs/judgment.md` §2 (this machine has no node; the osascript pipeline there is tested and works).
 
-## Architecture
+## When to read the other docs
 
-Everything is one file, organized top-to-bottom into clear `════` banner-delimited sections. When making changes, find the relevant section rather than searching the whole file:
-
-1. **PIN gate** — a hardcoded `PIN` constant gates the whole app via `sessionStorage`. There's no real auth; this is a shared-family passcode, not a security boundary.
-2. **App init / tab navigation** — `initApp()` bootstraps everything on load; `gotoTab(name)` switches between the four tabs (`home`, `acc`, `eng`, `alb`) by toggling `.on` classes, and lazily reloads that tab's data.
-3. **Accounting (記帳)** — voice-driven expense entry via Web Speech API (`SpeechRecognition`, zh-TW). Flow: mic captures a spoken sentence → `processAccVoice` calls the `ai-proxy` Supabase function (task `classify_expense`, 8s timeout) to extract `{amount, category, desc}` → falls back to local regex/keyword parsing (`extractAmt`, `guessCategory`, `CK` keyword map) if the AI call fails or times out → row inserted into the `accounts` table. Category pie charts are hand-rolled SVG (`renderPie`), not a charting library.
-4. **English learning (英語學習)** — a hardcoded `ALL_WORDS` array of English/Chinese sentence pairs and a `VOCAB` list. `todaysWords()` uses a seeded PRNG (`seededRand`, seeded from the date) so every user sees the same 5 sentences on a given day without server state. Playback (`playWord`/`playVocab`) chains multiple `SpeechSynthesisUtterance` calls (zh → slow en → word-by-word en → zh) using a token-based cancellation scheme (`_pt`/`chk()`) to abort stale speech chains when the user taps again. The conversation feature (`toggleEng`) sends chat history to `ai-proxy` (task `english_chat`) with a canned fallback reply bank (`FB`) keyed by keyword-matched topic when AI is unavailable.
-5. **Notifications** — local, per-day, `localStorage`-tracked (`nf_<type>_<date>` keys) browser `Notification` reminders scheduled with plain `setTimeout` from page-load time; there is no service worker or push, so a reminder only fires if the tab is open when the target time arrives.
-6. **Album (相簿)** — photo/video sharing to the `album_posts` Supabase table. Images are downscaled/compressed client-side to a data URL before upload (`compressImg`, max 1600px / ~900KB, JPEG quality stepped down until under budget); videos are capped at 10s / 5MB and also stored as base64 data URLs (no Supabase Storage/CDN — media is inline in the table row). Posts carry an `expires_at` 24h TTL; `loadAlbum()` fetches non-expired posts and opportunistically deletes expired ones client-side on every load (no server-side cron).
-
-## Data model (Supabase, inferred from client calls)
-
-- `accounts`: `id`, `amount`, `category` (食/衣/住/行/育/樂/其他), `raw` (description), `profile` (who logged it), `created_at`.
-- `album_posts`: `id`, `text_content`, `photo` (data URL or null), `video` (data URL or null), `profile`, `expires_at`, `created_at`.
-
-There's no local schema/migrations file in this repo — schema exists only in the Supabase project itself.
-
-## Conventions to preserve when editing
-
-- Vanilla ES5-leaning JS (`var`, `function`, no modules/bundler, no framework). Keep new code consistent with this style rather than introducing build tooling.
-- Every async/DOM-dependent call in `initApp()` is wrapped in its own `try/catch` with a `console.warn`/`console.error` — errors in one widget must not block the rest of the app from initializing.
-- UI strings are Traditional Chinese and written for an older/less tech-fluent user (large fonts/buttons, explicit voice prompts like「點一下開始說話，再點一下停止」). Match this tone and simplicity in new UI text.
-- AI calls always go through `callAI()` with a manual timeout race and a local fallback path — never assume the `ai-proxy` call succeeds or is fast.
+| Situation | Read first |
+|---|---|
+| Any non-trivial change to app behavior | `docs/architecture.md` |
+| Spawning a subagent / choosing a model | `docs/dispatch.md` |
+| Unsure whether it's done, whether to ask the user, whether to escalate, or whether you're off track | `docs/judgment.md` |
+| Writing a delegation prompt | `docs/delegation-templates.md` |
+| You made a costly mistake, or want to edit these docs | `docs/maintenance.md`, then log it in `docs/lessons.md` |
+| Starting a large task — context from the session that wrote these docs, incl. security caveats | `docs/handoff.md` |
