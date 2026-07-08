@@ -1,6 +1,7 @@
 # Lessons log
 
-Append-only field notes. Format and compaction rules: `docs/maintenance.md`.
+Append-only field notes. Format and compaction rules:
+`~/.claude/docs/maintenance.md`.
 Newest at the bottom.
 
 ## 2026-07-07 — No node on this machine
@@ -9,7 +10,7 @@ Newest at the bottom.
 - Root cause: assumed a dev toolchain exists; this is a plain macOS machine.
 - Rule: before writing any shell command into docs or delegating it, run it
   once here first. The working JS check is the osascript pipeline in
-  judgment.md §2.
+  `docs/project-conventions.md`.
 
 ## 2026-07-07 — Fresh-eyes review caught 13 defects the author missed
 - What happened: an independent review of the freshly written docs found the
@@ -21,4 +22,5 @@ Newest at the bottom.
   rather than re-checking it.
 - Rule: reviewer must run each documented command and compare output against
   the doc's claim, literally, as a weak model would read it. Self-review does
-  not count (dispatch.md "never self-certify" — this entry is the proof).
+  not count (`~/.claude/docs/dispatch.md` "never self-certify" — this entry
+  is the proof).

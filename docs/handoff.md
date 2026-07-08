@@ -26,11 +26,12 @@ diff can break her phone (the code leans on `webkitSpeechRecognition` and
 `-apple-system` fonts — likely iPhone Safari, though the exact device is
 UNVERIFIED; ask the user).
 
-**Fix (encoded in CLAUDE.md rule 3 + docs/judgment.md §2):** commits are allowed
-when asked; pushes only on explicit user instruction, and only after the
-"Definition of done" checklist passes — including the `osascript` JS syntax
-check (this machine has **no node**; the osascript pipeline was tested and works,
-see judgment.md for the exact command and how to read its output).
+**Fix (encoded in CLAUDE.md rule 3 + docs/project-conventions.md's "Definition
+of done, concretely"):** commits are allowed when asked; pushes only on
+explicit user instruction, and only after that checklist passes — including
+the `osascript` JS syntax check (this machine has **no node**; the osascript
+pipeline was tested and works, see project-conventions.md for the exact
+command and how to read its output).
 
 ### 3. Easiest way to lose the plot: over-engineering by default
 Weaker models reflexively "improve" things: add a package.json, split files,
@@ -41,8 +42,8 @@ low-vision primary user.
 
 **Fix (encoded as CLAUDE.md rules 1 and 4):** hard bans, not guidelines — no new
 tooling, no file splits, no font/tap-target/contrast reductions ever. Plus
-docs/judgment.md §4 lists these as wrong-direction signals: if your plan
-involves one, the plan is wrong by definition, don't retry harder.
+`~/.claude/docs/judgment.md` §4 lists these as wrong-direction signals: if
+your plan involves one, the plan is wrong by definition, don't retry harder.
 
 ## Part 2 — Letter: three things the user didn't ask, but you must know
 
@@ -75,15 +76,16 @@ your own "it should work".
 
 1. **Docs drift from code.** Section names, behaviors, and line counts change;
    stale docs are worse than none. Counter: docs reference grep-able banner
-   names, never line numbers; docs/maintenance.md makes fixing stale references
-   a no-permission-needed edit — do it the moment you notice.
+   names, never line numbers; `~/.claude/docs/maintenance.md` makes fixing
+   stale references a no-permission-needed edit — do it the moment you notice.
 2. **Satellite docs stop being read.** A future session sees CLAUDE.md, skips
    the table, and re-derives everything badly. Counter: every hard rule lives in
    CLAUDE.md itself (the satellites only add detail and procedure); the table
    gives concrete read-triggers, not "see also".
 3. **lessons.md becomes noise.** Append-only logs bloat until nobody reads them.
-   Counter: docs/maintenance.md sets a hard compaction trigger (~15 entries)
-   and requires user sign-off to compact, so it can't silently vanish either.
+   Counter: `~/.claude/docs/maintenance.md` sets a hard compaction trigger
+   (~15 entries) and requires user sign-off to compact, so it can't silently
+   vanish either.
 4. **The confirm-before-coding rule erodes.** Under time pressure the user says
    "直接改就好" a few times and future sessions generalize that into a norm.
    Counter: treat each such instruction as scoped to that one request; if the
