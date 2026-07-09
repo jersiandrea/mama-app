@@ -76,26 +76,76 @@ select,textarea,input[type=text],input[type=number],input[type=datetime-local]{
 .del-opt.red{border-color:var(--danger);color:var(--danger);}
 .pc{font-size:19px;color:var(--sage);font-weight:700;background:var(--sage-l);
   border-radius:10px;padding:9px 14px;margin-bottom:12px;text-align:center;}
-.wcard{background:var(--terra-l);border-radius:14px;padding:14px;margin-bottom:10px;
-  display:flex;align-items:stretch;gap:10px;}
-.wt{flex:1;}.wen{font-size:19px;font-weight:700;color:var(--terra);}
-.wzh{font-size:16px;color:var(--soft);margin-top:3px;}
-.wplay{background:var(--terra);color:#fff;border:none;border-radius:10px;
-  padding:0 16px;font-size:24px;cursor:pointer;flex-shrink:0;align-self:stretch;
-  display:flex;align-items:center;justify-content:center;min-width:52px;}
-.vcard{background:var(--sage-l);border-radius:14px;padding:14px;margin-bottom:10px;
-  display:flex;align-items:stretch;gap:10px;}
-.vcard .wen{color:var(--sage);}
-.vcard .wplay{background:var(--sage);}
+/* English flashcards */
+#flashcard{margin:0 -16px 12px;background:var(--terra-l);border-radius:24px;
+  padding:24px 22px;min-height:62vh;display:flex;flex-direction:column;gap:18px;
+  touch-action:pan-y;}
+#flashcard .fc-text{flex:2;display:flex;flex-direction:column;justify-content:center;min-height:0;}
+.fc-en{font-size:40px;font-weight:700;line-height:1.3;color:var(--terra);word-break:break-word;}
+.fc-zh{font-size:30px;line-height:1.5;margin-top:16px;color:var(--ink);}
+.fc-play{flex:1;border:none;border-radius:18px;background:var(--terra);color:#fff;
+  font-size:46px;display:flex;align-items:center;justify-content:center;min-height:100px;}
+#flashcard.fc-voc{background:var(--sage-l);}
+#flashcard.fc-voc .fc-en{color:var(--sage);}
+#flashcard.fc-voc .fc-play{background:var(--sage);}
+.fc-dots{display:flex;gap:8px;justify-content:center;align-items:center;margin:2px 0 4px;}
+.fc-dot{width:10px;height:10px;border-radius:5px;background:var(--border);flex-shrink:0;}
+.fc-dot.on{width:28px;background:var(--terra);}
+.vcol{display:flex;flex-direction:column;align-items:center;gap:10px;}
+.vcol .vstatus{text-align:center;margin-top:0;}
 .chat-box{max-height:240px;overflow-y:auto;margin-top:12px;}
 .bubble{padding:10px 14px;border-radius:14px;margin-bottom:7px;font-size:17px;}
 .me{background:var(--blue-l);margin-left:28px;}.ai{background:var(--sage-l);margin-right:28px;}
-.alb-item{border-bottom:1px solid var(--border);padding:12px 0;}
-.alb-item:last-child{border-bottom:none;}
-.alb-item img{width:100%;border-radius:12px;margin-top:8px;cursor:pointer;}
-.alb-item video{width:100%;border-radius:12px;margin-top:8px;max-height:280px;}
-.ntag{font-weight:700;font-size:18px;}
-.dnl{color:var(--blue);font-weight:700;text-decoration:underline;display:inline-block;margin-top:5px;font-size:15px;}
+/* Album — 畫面一：入口 */
+#alb-home{position:relative;}
+.alb-entry{background:rgba(255,255,255,.6);border:2px solid var(--border);border-radius:24px;
+  min-height:52vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:20px;margin-bottom:16px;padding:24px;}
+#alb-plus{width:150px;height:150px;border-radius:50%;border:6px solid var(--blue);
+  background:rgba(255,255,255,.85);color:var(--blue);font-size:80px;line-height:1;font-weight:700;
+  display:flex;align-items:center;justify-content:center;padding:0;}
+.alb-hint{font-size:20px;color:var(--soft);text-align:center;line-height:1.5;}
+#alb-edge{position:absolute;top:0;right:-16px;width:20%;height:100%;z-index:5;background:none;border:none;}
+/* Album — 畫面三：全螢幕瀏覽 */
+#alb-viewer{position:fixed;top:0;left:0;right:0;bottom:76px;max-width:480px;margin:0 auto;
+  background:#111;z-index:90;overflow:hidden;touch-action:pan-y;}
+#av-media{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
+#av-media img,#av-media video{max-width:100%;max-height:100%;object-fit:contain;}
+.av-text{color:#fff;font-size:26px;padding:28px;line-height:1.7;}
+#av-meta{position:absolute;top:0;left:0;right:0;padding:14px 70px 16px 16px;
+  background:linear-gradient(rgba(0,0,0,.6),transparent);color:#fff;}
+.av-name{font-size:19px;font-weight:700;}
+.av-time{font-size:15px;opacity:.9;margin-top:2px;}
+.av-cap{font-size:17px;margin-top:6px;}
+#av-close{position:absolute;top:12px;right:12px;width:52px;height:52px;border-radius:50%;
+  border:none;background:rgba(255,255,255,.28);color:#fff;font-size:26px;z-index:3;}
+#av-pos{position:absolute;top:70px;right:16px;color:#fff;font-size:15px;opacity:.9;z-index:2;}
+.av-actions{position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:space-between;
+  gap:12px;padding:16px;background:linear-gradient(transparent,rgba(0,0,0,.6));}
+.av-btn{border:none;border-radius:999px;background:rgba(255,255,255,.92);color:var(--ink);
+  font-size:20px;font-weight:700;padding:14px 24px;}
+/* Album — 畫面四：聊天 */
+#alb-chat{position:fixed;top:0;left:0;right:0;bottom:76px;max-width:480px;margin:0 auto;
+  background:var(--bg);z-index:90;flex-direction:column;}
+.ac-top{display:flex;align-items:center;gap:12px;padding:10px 14px;background:#fff;
+  border-bottom:1px solid var(--border);}
+#ac-back{border:none;background:var(--blue-l);color:var(--blue);font-size:22px;font-weight:700;
+  border-radius:14px;padding:12px 22px;flex-shrink:0;}
+.ac-title{font-size:20px;font-weight:700;}
+#ac-thumb{padding:12px 16px 0;display:flex;align-items:center;gap:12px;}
+#ac-thumb img,#ac-thumb video{width:86px;height:86px;object-fit:cover;border-radius:12px;flex-shrink:0;}
+.ac-ttxt{font-size:17px;color:var(--ink);background:#fff;border:1px solid var(--border);
+  border-radius:12px;padding:10px 12px;}
+.ac-tname{font-size:16px;color:var(--soft);}
+#ac-msgs{flex:1;overflow-y:auto;padding:12px 16px;}
+.ac-line{margin-bottom:10px;display:flex;flex-direction:column;align-items:flex-start;}
+.ac-line.mine{align-items:flex-end;}
+.ac-who{font-size:14px;color:var(--soft);margin:0 0 3px 6px;}
+.ac-line .bubble{max-width:82%;font-size:19px;margin:0;}
+.ac-inrow{display:flex;gap:10px;padding:12px 14px;background:#fff;border-top:1px solid var(--border);}
+.ac-inrow input{flex:1;}
+#ac-send{border:none;border-radius:14px;background:var(--blue);color:#fff;font-size:20px;
+  font-weight:700;padding:0 22px;flex-shrink:0;}
 .vtoggle{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--border);}
 .vtoggle:last-child{border-bottom:none;}
 .tgl{width:52px;height:28px;border-radius:14px;border:none;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;}
@@ -125,12 +175,6 @@ select,textarea,input[type=text],input[type=number],input[type=datetime-local]{
 .frow label{display:block;font-size:16px;color:var(--soft);margin-bottom:5px;}
 .mact{display:flex;gap:9px;margin-top:18px;}
 .mact button{flex:1;font-size:19px;font-weight:700;padding:16px;border-radius:12px;border:none;}
-/* Photo overlay */
-#photo-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);
-  z-index:999;align-items:center;justify-content:center;flex-direction:column;}
-#photo-overlay img{max-width:100%;max-height:85vh;object-fit:contain;}
-#photo-overlay button{margin-top:18px;font-size:21px;font-weight:700;
-  padding:13px 34px;border-radius:12px;border:none;background:#fff;color:#232323;}
 </style>
 </head>
 <body>
@@ -230,19 +274,21 @@ select,textarea,input[type=text],input[type=number],input[type=datetime-local]{
 
     <!-- 英語 -->
     <div class="tab" id="t-eng">
-      <div class="card">
-        <h2>今日五句生活英語</h2>
-        <div class="pc" id="play-count">本日練習：0 次</div>
-        <div id="daily-words"></div>
-        <div style="margin-top:18px;">
-          <h3>📝 今日重點單字</h3>
-          <div id="daily-vocab"></div>
+      <h2 id="fc-label">今日五句生活英語</h2>
+      <div class="pc" id="play-count">本日練習：0 次</div>
+      <div id="flashcard">
+        <div class="fc-text">
+          <div class="fc-en" id="fc-en"></div>
+          <div class="fc-zh" id="fc-zh"></div>
         </div>
+        <button class="fc-play" id="fc-play" onclick="playCard()" aria-label="播放這張字卡">🔊</button>
       </div>
+      <div class="fc-dots" id="fc-dots"></div>
+      <p class="soft" style="text-align:center;margin:4px 0 18px;">左右滑動可以換一張字卡</p>
       <div class="card">
         <h2>開口說說看</h2>
-        <p class="soft" style="margin:0 0 12px;font-size:16px;">說英文練習對話。點按鈕開始，再按一次停止。</p>
-        <div class="vrow">
+        <p class="soft" style="margin:0 0 12px;font-size:16px;">說英文練習對話。</p>
+        <div class="vcol">
           <button class="mic idle" id="eng-mic" onclick="toggleEng()">🎙️</button>
           <div class="vstatus" id="eng-st">點一下開始說，再點一下停止</div>
         </div>
@@ -252,24 +298,56 @@ select,textarea,input[type=text],input[type=number],input[type=datetime-local]{
 
     <!-- 相簿 -->
     <div class="tab" id="t-alb">
-      <div class="card">
-        <h2>分享現在的生活</h2>
-        <textarea id="alb-text" rows="3" placeholder="想跟家人說什麼呢？"></textarea>
-        <div style="margin-top:12px;">
-          <input type="file" id="alb-photo" accept="image/*" capture="environment" style="display:none;" onchange="onPhotoSel(this)">
-          <button class="big b-out" id="photo-btn" onclick="document.getElementById('alb-photo').click()">🖼️　選擇或拍攝照片</button>
-          <input type="file" id="alb-video" accept="video/*" capture="environment" style="display:none;" onchange="onVideoSel(this)">
-          <button class="big b-out" id="video-btn" onclick="document.getElementById('alb-video').click()">🎥　拍攝影片</button>
-          <button class="big b-out red" id="cancel-vid-btn" onclick="cancelVideo()" style="display:none;border-color:var(--danger);color:var(--danger);">✕　取消影片</button>
-          <video id="vid-preview" controls playsinline style="display:none;width:100%;border-radius:12px;margin-top:8px;max-height:260px;"></video>
-          <input type="hidden" id="vid-data">
-          <button class="big b-blue" onclick="postAlbum()">📤　分享出去</button>
+
+      <!-- 畫面一：入口 -->
+      <div id="alb-home">
+        <div class="alb-entry">
+          <button id="alb-plus" onclick="albCapture()" aria-label="拍照或錄影分享給家人">＋</button>
+          <div class="alb-hint">點一下「＋」<br>拍照或錄影分享給家人</div>
+          <div class="soft" id="alb-count" style="font-size:16px;text-align:center;"></div>
         </div>
-        <p class="soft" style="font-size:15px;margin-top:4px;">照片和影片將在 24 小時後自動刪除，刪除前可下載。</p>
+        <button class="big b-blue" onclick="openViewer(0)">👀　看看家人的分享</button>
+        <p class="soft" style="font-size:15px;margin-top:2px;text-align:center;">也可以往右滑動打開｜內容 24 小時後自動刪除</p>
+        <button id="alb-edge" onclick="openViewer(0)" aria-label="看看家人的分享"></button>
       </div>
-      <div class="card">
-        <h2>家人都在做什麼</h2>
-        <div id="alb-list"><div class="loading">載入中⋯</div></div>
+      <input type="file" id="alb-file" accept="image/*,video/*" capture="environment" style="display:none;" onchange="onAlbFile(this)">
+
+      <!-- 畫面二之後的預覽：取消或上傳 -->
+      <div id="alb-preview" style="display:none;">
+        <div class="card">
+          <h2>要分享這一則嗎？</h2>
+          <img id="prev-img" style="display:none;width:100%;border-radius:14px;margin-bottom:12px;" alt="照片預覽">
+          <video id="prev-vid" controls playsinline loop style="display:none;width:100%;border-radius:14px;margin-bottom:12px;max-height:340px;"></video>
+          <div class="vstatus" id="alb-up-st" style="text-align:center;margin:0 0 10px;"></div>
+          <button class="big b-blue" id="alb-up-btn" onclick="uploadCapture()">📤　上傳分享</button>
+          <button class="big b-out" onclick="cancelCapture()" style="border-color:var(--danger);color:var(--danger);">✕　取消</button>
+        </div>
+      </div>
+
+      <!-- 畫面三：全螢幕瀏覽 -->
+      <div id="alb-viewer" style="display:none;">
+        <div id="av-media"></div>
+        <div id="av-meta"></div>
+        <div id="av-pos"></div>
+        <button id="av-close" onclick="showAlbScreen('home')" aria-label="回到相簿首頁">✕</button>
+        <div class="av-actions">
+          <button class="av-btn" onclick="albDownload()">⬇️　儲存</button>
+          <button class="av-btn" onclick="openChat()">💬　聊天</button>
+        </div>
+      </div>
+
+      <!-- 畫面四：聊天 -->
+      <div id="alb-chat" style="display:none;">
+        <div class="ac-top">
+          <button id="ac-back" onclick="closeChat()">‹　返回</button>
+          <div class="ac-title">回覆這一則</div>
+        </div>
+        <div id="ac-thumb"></div>
+        <div id="ac-msgs"></div>
+        <div class="ac-inrow">
+          <input type="text" id="ac-input" placeholder="想跟家人說什麼呢？" onkeydown="if(event.key==='Enter')sendChat()">
+          <button id="ac-send" onclick="sendChat()">送出</button>
+        </div>
       </div>
     </div>
 
@@ -314,17 +392,6 @@ select,textarea,input[type=text],input[type=number],input[type=datetime-local]{
       <button id="del-ok" style="background:var(--danger);color:#fff;">確認刪除</button>
     </div>
   </div>
-</div>
-
-<!-- Photo overlay -->
-<div id="photo-overlay" onclick="closePhoto()">
-  <img id="po-img" src="" alt="">
-  <button onclick="closePhoto()">✕　關閉</button>
-</div>
-
-<div id="video-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:999;flex-direction:column;align-items:center;justify-content:center;" onclick="closeVideoOverlay(event)">
-  <video id="vo-vid" controls playsinline style="max-width:100%;max-height:85vh;border-radius:10px;" autoplay></video>
-  <button onclick="closeVideoOverlay()" style="margin-top:18px;font-size:21px;font-weight:700;padding:13px 34px;border-radius:12px;border:none;background:#fff;color:#232323;">✕　關閉</button>
 </div>
 
 <script>
@@ -398,8 +465,7 @@ function initApp() {
 
   try { initNotifToggles(); } catch(e) { console.warn('notif error:', e); }
   try { loadPlayCount(); } catch(e) { console.warn('playcount error:', e); }
-  try { renderWords(); } catch(e) { console.error('renderWords error:', e); }
-  try { renderVocab(); } catch(e) { console.error('renderVocab error:', e); }
+  try { buildDeck(); renderCard(); } catch(e) { console.error('renderCard error:', e); }
   try { loadAcc(); } catch(e) { console.warn('loadAcc error:', e); }
   try { loadAlbum(); } catch(e) { console.warn('loadAlbum error:', e); }
   try {
@@ -426,8 +492,8 @@ function gotoTab(name) {
   var nb = document.getElementById(navmap[name]);
   if (nb) nb.classList.add('on');
   if (name === 'acc') { loadAcc(); }
-  if (name === 'eng') { renderWords(); renderVocab(); loadPlayCount(); }
-  if (name === 'alb') { loadAlbum(); }
+  if (name === 'eng') { buildDeck(); renderCard(); loadPlayCount(); }
+  if (name === 'alb') { showAlbScreen('home'); loadAlbum(); }
 }
 
 /* ════════════════════════════════════════
@@ -745,53 +811,68 @@ function pcKey(){ var d=new Date(); return 'pc_'+d.getFullYear()+'_'+(d.getMonth
 function loadPlayCount(){ var n=parseInt(localStorage.getItem(pcKey())||'0'); document.getElementById('play-count').textContent='本日練習：'+n+' 次'; }
 function incPlay(){ var k=pcKey(); var n=parseInt(localStorage.getItem(k)||'0')+1; localStorage.setItem(k,n); document.getElementById('play-count').textContent='本日練習：'+n+' 次'; }
 
-// Render words and vocab
-function renderWords() {
-  var el=document.getElementById('daily-words');
-  if(!el)return;
+// Flashcard deck：五句生活英語＋重點單字合成同一疊字卡
+var _deck=[], _deckIdx=0;
+
+function buildDeck() {
+  _deck=[]; _deckIdx=0;
   try{
     var ws=todaysWords();
-    if(!ws||!ws.length){el.innerHTML='<div class="soft">句子載入中...</div>';return;}
-    el.innerHTML=ws.map(function(w,i){
-      return '<div class="wcard"><div class="wt"><div class="wen">'+esc(w.en)+'</div><div class="wzh">'+esc(w.zh)+'</div></div>'
-        +'<button class="wplay" id="wbtn'+i+'" onclick="playWord('+i+')">🔊</button></div>';
-    }).join('');
-  }catch(e){console.error('renderWords:',e);el.innerHTML='<div class="soft">載入失敗，請重新整理</div>';}
-}
-function renderVocab() {
-  var el=document.getElementById('daily-vocab');
-  if(!el)return;
-  try{
+    for(var i=0;i<ws.length;i++) _deck.push({kind:'sen',en:ws[i].en,zh:ws[i].zh});
     var vs=getTodaysVocab();
-    if(!vs||!vs.length){el.innerHTML='<div class="soft" style="font-size:15px;">今日句子沒有找到重點單字</div>';return;}
-    el.innerHTML=vs.map(function(v,i){
-      return '<div class="vcard"><div class="wt"><div class="wen">'+esc(v.en)+'</div><div class="wzh">'+esc(v.zh)+'</div></div>'
-        +'<button class="wplay" id="vbtn'+i+'" onclick="playVocab('+i+')">🔊</button></div>';
-    }).join('');
-  }catch(e){console.error('renderVocab:',e);}
+    for(var j=0;j<vs.length;j++) _deck.push({kind:'voc',en:vs[j].en,zh:vs[j].zh});
+  }catch(e){console.error('buildDeck:',e);}
+}
+
+function renderCard() {
+  var card=document.getElementById('flashcard');
+  if(!card)return;
+  try{
+    if(!_deck.length) buildDeck();
+    if(!_deck.length){document.getElementById('fc-zh').textContent='句子載入中，請稍等';return;}
+    if(_deckIdx<0)_deckIdx=0;
+    if(_deckIdx>=_deck.length)_deckIdx=_deck.length-1;
+    var c=_deck[_deckIdx];
+    document.getElementById('fc-en').textContent=c.en;
+    document.getElementById('fc-zh').textContent=c.zh;
+    document.getElementById('fc-label').textContent=(c.kind==='sen'?'今日五句生活英語':'今日重點單字');
+    card.className=(c.kind==='voc'?'fc-voc':'');
+    document.getElementById('fc-play').textContent='🔊';
+    var dots='';
+    for(var k=0;k<_deck.length;k++) dots+='<span class="fc-dot'+(k===_deckIdx?' on':'')+'"></span>';
+    document.getElementById('fc-dots').innerHTML=dots;
+  }catch(e){console.error('renderCard:',e);}
+}
+
+function nextCard(dir) {
+  var n=_deckIdx+dir;
+  if(n<0||n>=_deck.length)return;
+  stopAll();
+  _deckIdx=n;
+  renderCard();
 }
 
 // Speech play with token-based cancellation
-var _pt = 0, _stids = [], _playType = '', _playIdx = -1, _vocabIdx = -1;
+var _pt = 0, _stids = [], _playing = false;
 
 function stopAll() {
   _pt++;
   speechSynthesis.cancel();
   _stids.forEach(function(id){ clearTimeout(id); });
   _stids = [];
-  _playType = ''; _playIdx = -1; _vocabIdx = -1;
-  document.querySelectorAll('.wplay').forEach(function(b){ b.textContent='🔊'; });
+  _playing = false;
+  var fp=document.getElementById('fc-play'); if(fp)fp.textContent='🔊';
 }
 
 function sayZh(t) { var u=new SpeechSynthesisUtterance(t);u.lang='zh-TW';u.rate=0.95;speechSynthesis.cancel();speechSynthesis.speak(u); }
 
-function playWord(idx) {
-  if (_playType==='word' && _playIdx===idx) { stopAll(); return; }
+function playCard() {
+  if (_playing) { stopAll(); return; }
   stopAll();
-  _playType='word'; _playIdx=idx;
-  var btn=document.getElementById('wbtn'+idx); if(btn)btn.textContent='⏸';
+  var c=_deck[_deckIdx]; if(!c)return;
+  _playing=true;
+  var btn=document.getElementById('fc-play'); if(btn)btn.textContent='⏸';
   incPlay();
-  var w=todaysWords()[idx];
   var tok=_pt;
   var voices=speechSynthesis.getVoices();
   var enV=voices.find(function(v){return v.lang==='en-US';})||voices.find(function(v){return v.lang&&v.lang.startsWith('en');});
@@ -805,63 +886,53 @@ function playWord(idx) {
     u.onend=function(){if(chk()&&cb)cb();};
     speechSynthesis.speak(u);
   }
+  function fin(){ if(chk())stopAll(); }
 
-  // zh → 2s → en(0.5x full) → 2s → en word-by-word(0.5x,2s gap) → 2s → zh
-  sp(w.zh,'zh-TW',0.95,null,function(){
-    lat(function(){
-      sp(w.en,'en-US',0.5,enV,function(){
-        lat(function(){
-          var words=w.en.split(/\s+/); var wi=0;
-          function nw(){
-            if(!chk())return;
-            if(wi>=words.length){ lat(function(){ sp(w.zh,'zh-TW',0.95,null,function(){ if(chk()){stopAll();if(btn)btn.textContent='🔊';} }); },2000); return; }
-            sp(words[wi],'en-US',0.5,enV,function(){ wi++; lat(nw,2000); });
-          }
-          nw();
-        },2000);
-      });
-    },2000);
-  });
-}
-
-function playVocab(idx) {
-  if (_playType==='vocab' && _vocabIdx===idx) { stopAll(); return; }
-  stopAll();
-  _playType='vocab'; _vocabIdx=idx;
-  var btn=document.getElementById('vbtn'+idx); if(btn)btn.textContent='⏸';
-  incPlay();
-  var v=getTodaysVocab()[idx]; if(!v)return;
-  var tok=_pt;
-  var voices=speechSynthesis.getVoices();
-  var enV=voices.find(function(vx){return vx.lang==='en-US';})||voices.find(function(vx){return vx.lang&&vx.lang.startsWith('en');});
-
-  function chk(){return _pt===tok;}
-  function lat(fn,ms){ if(!chk())return; var id=setTimeout(function(){if(chk())fn();},ms); _stids.push(id); }
-  function sp(text,lang,rate,voice,cb){
-    if(!chk())return;
-    var u=new SpeechSynthesisUtterance(text); u.lang=lang; u.rate=rate; u.pitch=1;
-    if(voice)u.voice=voice;
-    u.onend=function(){if(chk()&&cb)cb();};
-    speechSynthesis.speak(u);
+  if (c.kind==='sen') {
+    // zh → 2s → en(0.8x full) → 2s → en word-by-word(0.8x,2s gap) → 2s → zh
+    sp(c.zh,'zh-TW',0.95,null,function(){
+      lat(function(){
+        sp(c.en,'en-US',0.8,enV,function(){
+          lat(function(){
+            var words=c.en.split(/\s+/); var wi=0;
+            function nw(){
+              if(!chk())return;
+              if(wi>=words.length){ lat(function(){ sp(c.zh,'zh-TW',0.95,null,fin); },2000); return; }
+              sp(words[wi],'en-US',0.8,enV,function(){ wi++; lat(nw,2000); });
+            }
+            nw();
+          },2000);
+        });
+      },2000);
+    });
+  } else {
+    // zh → 1s → en(0.8x) → 2s → en(0.8x) → zh
+    sp(c.zh,'zh-TW',0.95,null,function(){
+      lat(function(){
+        sp(c.en,'en-US',0.8,enV,function(){
+          lat(function(){
+            sp(c.en,'en-US',0.8,enV,function(){
+              lat(function(){ sp(c.zh,'zh-TW',0.95,null,fin); },500);
+            });
+          },2000);
+        });
+      },1000);
+    });
   }
-
-  // zh → 1s → en(0.5x) → 2s → en(0.5x) → zh
-  sp(v.zh,'zh-TW',0.95,null,function(){
-    lat(function(){
-      sp(v.en,'en-US',0.5,enV,function(){
-        lat(function(){
-          sp(v.en,'en-US',0.5,enV,function(){
-            lat(function(){
-              sp(v.zh,'zh-TW',0.95,null,function(){
-                if(chk()){stopAll();if(btn)btn.textContent='🔊';}
-              });
-            },500);
-          });
-        },2000);
-      });
-    },1000);
-  });
 }
+
+// 字卡左右滑動：手指往右＝下一張，往左＝上一張
+(function(){
+  var fc=document.getElementById('flashcard');
+  if(!fc)return;
+  var sx=0,sy=0;
+  fc.addEventListener('touchstart',function(e){sx=e.touches[0].clientX;sy=e.touches[0].clientY;},{passive:true});
+  fc.addEventListener('touchend',function(e){
+    var dx=e.changedTouches[0].clientX-sx, dy=e.changedTouches[0].clientY-sy;
+    if(Math.abs(dx)<40||Math.abs(dx)<Math.abs(dy))return;
+    nextCard(dx>0?1:-1);
+  },{passive:true});
+})();
 
 // Conversation
 var engRec=null, engListen=false;
@@ -992,134 +1063,216 @@ function getVideoDuration(file){
   });
 }
 
-function onPhotoSel(input){
+var albItems=[], albScreen='home', albIdx=0;
+var _pendFile=null, _pendKind='';
+var chatPost=null, chatMsgs=[], chatTimer=null;
+
+// 畫面切換：home（入口）/ preview（上傳前預覽）/ viewer（全螢幕瀏覽）/ chat（聊天）
+function showAlbScreen(name){
+  albScreen=name;
+  document.getElementById('alb-home').style.display=(name==='home'?'block':'none');
+  document.getElementById('alb-preview').style.display=(name==='preview'?'block':'none');
+  document.getElementById('alb-viewer').style.display=(name==='viewer'?'block':'none');
+  document.getElementById('alb-chat').style.display=(name==='chat'?'flex':'none');
+  if(name!=='viewer'){ var v=document.getElementById('av-vid'); if(v)v.pause(); }
+  if(name!=='chat'&&chatTimer){ clearInterval(chatTimer); chatTimer=null; }
+}
+
+// 畫面一 → 二：點「＋」開手機相機（拍照或錄影）
+function albCapture(){ document.getElementById('alb-file').click(); }
+
+async function onAlbFile(input){
   var file=input.files[0]; if(!file)return;
-  document.getElementById('photo-btn').textContent='✅ 已選好照片了';
-}
-
-async function onVideoSel(input){
-  var file=input.files[0]; if(!file)return;
-  var dur=await getVideoDuration(file);
-  if(dur>10){
-    alert('影片時長過長，請拍攝十秒內影片');
-    input.value=''; return;
+  var isVid=!!(file.type&&file.type.indexOf('video')===0);
+  if(isVid){
+    var dur=await getVideoDuration(file);
+    if(dur>10){
+      alert('影片時長過長，請拍攝十秒內影片');
+      input.value=''; return;
+    }
+    if(file.size>5*1024*1024){
+      alert('影片檔案太大（'+Math.round(file.size/1024/1024*10)/10+'MB），請拍攝較短的影片');
+      input.value=''; return;
+    }
   }
-  if(file.size>5*1024*1024){
-    alert('影片檔案太大（'+Math.round(file.size/1024/1024*10)/10+'MB），請拍攝較短的影片');
-    input.value=''; return;
+  _pendFile=file; _pendKind=isVid?'video':'photo';
+  var img=document.getElementById('prev-img'), vid=document.getElementById('prev-vid');
+  if(isVid){
+    img.style.display='none';
+    vid.src=URL.createObjectURL(file); vid.style.display='block';
+  }else{
+    vid.pause(); vid.removeAttribute('src'); vid.style.display='none';
+    img.src=URL.createObjectURL(file); img.style.display='block';
   }
-  var b64=await fileToB64(file);
-  document.getElementById('vid-data').value=b64;
-  var prev=document.getElementById('vid-preview');
-  prev.src=URL.createObjectURL(file);
-  prev.style.display='block';
-  document.getElementById('video-btn').style.display='none';
-  document.getElementById('cancel-vid-btn').style.display='flex';
+  document.getElementById('alb-up-st').textContent='';
+  showAlbScreen('preview');
 }
 
-function cancelVideo(){
-  document.getElementById('vid-data').value='';
-  document.getElementById('alb-video').value='';
-  var prev=document.getElementById('vid-preview');
-  prev.style.display='none'; prev.src='';
-  document.getElementById('cancel-vid-btn').style.display='none';
-  document.getElementById('video-btn').style.display='flex';
+function cancelCapture(){
+  _pendFile=null; _pendKind='';
+  document.getElementById('alb-file').value='';
+  var vid=document.getElementById('prev-vid');
+  vid.pause(); vid.removeAttribute('src'); vid.style.display='none';
+  document.getElementById('prev-img').style.display='none';
+  showAlbScreen('home');
 }
 
-var albItems=[];
-
-async function postAlbum(){
-  var textEl=document.getElementById('alb-text');
-  var photoEl=document.getElementById('alb-photo');
-  var vidData=document.getElementById('vid-data').value;
-  var text=textEl.value.trim();
-  var photoFile=photoEl.files[0];
-  if(!text&&!photoFile&&!vidData){ alert('請輸入文字、選擇照片或拍攝影片'); return; }
-  var photoData=null;
-  if(photoFile) photoData=await compressImg(photoFile,900);
-  var expiresAt=new Date(Date.now()+24*60*60*1000).toISOString();
-  var row={id:'alb_'+Date.now(),text_content:text||null,photo:photoData||null,video:vidData||null,profile:who,expires_at:expiresAt};
-  var r=await sb.from('album_posts').insert(row);
-  if(r.error){ console.error(r.error); alert('分享失敗，請再試一次（'+JSON.stringify(r.error)+')'); return; }
-  // reset form
-  textEl.value=''; photoEl.value=''; document.getElementById('photo-btn').textContent='🖼️　選擇或拍攝照片';
-  cancelVideo();
-  // optimistic update
-  var newItem=Object.assign({},row,{created_at:new Date().toISOString()});
-  if(!albItems.length){ loadAlbum(); }
-  else { albItems.unshift(newItem); renderAlbum(); }
+async function uploadCapture(){
+  if(!_pendFile){ showAlbScreen('home'); return; }
+  if(!sb){ document.getElementById('alb-up-st').textContent='資料庫未連線，請再試一次'; return; }
+  var st=document.getElementById('alb-up-st');
+  var btn=document.getElementById('alb-up-btn');
+  btn.disabled=true; st.textContent='上傳中，請稍等⋯';
+  try{
+    var photoData=null, vidData=null;
+    if(_pendKind==='photo') photoData=await compressImg(_pendFile,900);
+    else vidData=await fileToB64(_pendFile);
+    var expiresAt=new Date(Date.now()+24*60*60*1000).toISOString();
+    var row={id:'alb_'+Date.now(),text_content:null,photo:photoData,video:vidData,profile:who,expires_at:expiresAt};
+    var r=await sb.from('album_posts').insert(row);
+    if(r.error){ console.error(r.error); st.textContent='分享失敗，請再試一次'; btn.disabled=false; return; }
+    albItems.unshift(Object.assign({},row,{created_at:new Date().toISOString()}));
+    btn.disabled=false;
+    cancelCapture();
+    openViewer(0); // 讓媽媽馬上看到剛分享的內容
+  }catch(e){ console.error('uploadCapture:',e); st.textContent='分享失敗，請再試一次'; btn.disabled=false; }
 }
 
 async function loadAlbum(){
-  var el=document.getElementById('alb-list');
-  el.innerHTML='<div class="loading">載入中⋯</div>';
-  if(!sb){document.getElementById('alb-list').innerHTML='<div class="empty">資料庫未連線</div>';return;}
+  var cnt=document.getElementById('alb-count');
+  if(!sb){ if(cnt)cnt.textContent='資料庫未連線'; return; }
   var now=new Date().toISOString();
   var r=await sb.from('album_posts').select('*').gt('expires_at',now).order('created_at',{ascending:false}).limit(30);
   sb.from('album_posts').delete().lt('expires_at',now).then(function(){});
+  sb.from('album_chats').delete().lt('expires_at',now).then(function(){});
   albItems=r.data||[];
-  renderAlbum();
+  if(cnt)cnt.textContent=albItems.length?('家人有 '+albItems.length+' 則分享可以看'):'現在還沒有新的分享，拍一張吧！';
+  if(albScreen==='viewer') renderViewer();
 }
 
-function renderAlbum(){
-  var el=document.getElementById('alb-list');
-  if(!albItems.length){el.innerHTML='<div class="empty">目前還沒有分享內容</div>';return;}
-  el.innerHTML=albItems.map(function(it,idx){
-    var d=new Date(it.created_at);
-    var ds=d.getFullYear()+'/'
-      +String(d.getMonth()+1).padStart(2,'0')+'/'
-      +String(d.getDate()).padStart(2,'0')+' '
-      +String(d.getHours()).padStart(2,'0')+':'
-      +String(d.getMinutes()).padStart(2,'0');
-    var hl=Math.max(0,Math.round((new Date(it.expires_at)-new Date())/3600000));
-    var vidHtml='';
-    if(it.video){
-      var mt=it.video.match(/^data:(video\/[^;]+)/);
-      var mime=mt?mt[1]:'video/mp4';
-      vidHtml='<div onclick="openVideoOverlay('+idx+')" style="position:relative;cursor:pointer;margin-top:8px;">'
-        +'<video style="width:100%;border-radius:12px;pointer-events:none;" muted playsinline preload="metadata">'
-        +'<source src="'+it.video+'" type="'+mime+'">'
-        +'<source src="'+it.video+'" type="video/mp4"></video>'
-        +'<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;border-radius:12px;background:rgba(0,0,0,.3);">'
-        +'<span style="font-size:52px;">▶️</span></div></div>'
-        +'<a class="dnl" href="'+it.video+'" download="video_'+it.id+'.mp4">⬇️ 下載影片</a>';
-    }
-    return '<div class="alb-item">'
-      +'<span class="ntag">'+esc(it.profile)+'</span> '
-      +'<span class="soft" style="font-size:14px;">'+ds+'（還有 '+hl+' 小時）</span>'
-      +(it.text_content?'<div style="margin-top:7px;">'+esc(it.text_content)+'</div>':'')
-      +(it.photo?'<img src="'+it.photo+'" alt="照片" onclick="openPhoto('+idx+')">'
-        +'<a class="dnl" href="'+it.photo+'" download="photo_'+it.id+'.jpg">⬇️ 下載照片</a>':'')
-      +vidHtml
-      +'</div>';
+// 畫面三：全螢幕瀏覽
+function openViewer(i){
+  if(!albItems.length){
+    var cnt=document.getElementById('alb-count');
+    if(cnt)cnt.textContent='現在還沒有新的分享，拍一張吧！';
+    loadAlbum(); return;
+  }
+  albIdx=Math.max(0,Math.min(i,albItems.length-1));
+  showAlbScreen('viewer');
+  renderViewer();
+}
+
+function renderViewer(){
+  var it=albItems[albIdx];
+  if(!it){ showAlbScreen('home'); return; }
+  var med=document.getElementById('av-media');
+  var h='';
+  if(it.photo){
+    h='<img src="'+it.photo+'" alt="家人分享的照片">';
+  }else if(it.video){
+    var mt=it.video.match(/^data:(video\/[^;]+)/);
+    var mime=mt?mt[1]:'video/mp4';
+    h='<video id="av-vid" playsinline loop><source src="'+it.video+'" type="'+mime+'"></video>';
+  }else if(it.text_content){
+    h='<div class="av-text">'+esc(it.text_content)+'</div>';
+  }
+  med.innerHTML=h;
+  var v=document.getElementById('av-vid');
+  if(v){ v.play().catch(function(){ v.muted=true; v.play().catch(function(){}); }); }
+  document.getElementById('av-meta').innerHTML=
+    '<div class="av-name">'+esc(it.profile)+'</div>'
+    +'<div class="av-time">'+fmtDt(it.created_at)+'</div>'
+    +(it.text_content&&(it.photo||it.video)?'<div class="av-cap">'+esc(it.text_content)+'</div>':'');
+  document.getElementById('av-pos').textContent=(albIdx+1)+' / '+albItems.length;
+}
+
+function albDownload(){
+  var it=albItems[albIdx]; if(!it)return;
+  var a=document.createElement('a');
+  if(it.photo){ a.href=it.photo; a.download='photo_'+it.id+'.jpg'; }
+  else if(it.video){ a.href=it.video; a.download='video_'+it.id+'.mp4'; }
+  else return;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+
+// 畫面四：聊天
+function openChat(){
+  chatPost=albItems[albIdx]; if(!chatPost)return;
+  showAlbScreen('chat');
+  renderChatThumb();
+  document.getElementById('ac-msgs').innerHTML='<div class="loading">載入中⋯</div>';
+  loadChat();
+  if(chatTimer)clearInterval(chatTimer);
+  chatTimer=setInterval(loadChat,8000);
+}
+
+function closeChat(){
+  showAlbScreen('viewer');
+  renderViewer();
+}
+
+function renderChatThumb(){
+  var it=chatPost, el=document.getElementById('ac-thumb');
+  var h='';
+  if(it.photo) h='<img src="'+it.photo+'" alt="照片縮圖">';
+  else if(it.video) h='<video src="'+it.video+'" muted playsinline preload="metadata"></video>';
+  else if(it.text_content) h='<div class="ac-ttxt">'+esc(it.text_content)+'</div>';
+  el.innerHTML=h+'<div class="ac-tname">'+esc(it.profile)+'　'+fmtDt(it.created_at)+'<br>分享的內容</div>';
+}
+
+async function loadChat(){
+  if(!chatPost||!sb)return;
+  var now=new Date().toISOString();
+  var r=await sb.from('album_chats').select('*').eq('post_id',chatPost.id).gt('expires_at',now).order('created_at',{ascending:true}).limit(100);
+  if(r.error){ console.error(r.error); document.getElementById('ac-msgs').innerHTML='<div class="empty">聊天載入失敗，請再試一次</div>'; return; }
+  chatMsgs=r.data||[];
+  renderChat();
+}
+
+function renderChat(){
+  var el=document.getElementById('ac-msgs');
+  if(!chatMsgs.length){ el.innerHTML='<div class="empty">還沒有人留言，說句話吧！</div>'; return; }
+  el.innerHTML=chatMsgs.map(function(m){
+    var mine=(m.profile===who);
+    return '<div class="ac-line'+(mine?' mine':'')+'">'
+      +(mine?'':'<div class="ac-who">'+esc(m.profile)+'</div>')
+      +'<div class="bubble '+(mine?'me':'ai')+'">'+esc(m.text_content)+'</div></div>';
   }).join('');
+  el.scrollTop=el.scrollHeight;
 }
 
-function openPhoto(idx){ var it=albItems[idx];if(!it||!it.photo)return;document.getElementById('po-img').src=it.photo;document.getElementById('photo-overlay').style.display='flex'; }
-function closePhoto(){ document.getElementById('photo-overlay').style.display='none'; }
-function openVideoOverlay(idx){
-  var it=albItems[idx]; if(!it||!it.video)return;
-  var vid=document.getElementById('vo-vid');
-  // 先完整重置，避免舊影片殘留
-  vid.pause();
-  vid.removeAttribute('src');
-  vid.innerHTML='';
-  vid.load();
-  // 直接用 src 設定（比 <source> 更穩定）
-  vid.src=it.video;
-  vid.load();
-  vid.play().catch(function(){});
-  document.getElementById('video-overlay').style.display='flex';
+async function sendChat(){
+  var inp=document.getElementById('ac-input');
+  var t=inp.value.trim(); if(!t||!chatPost)return;
+  if(!sb){ alert('資料庫未連線，請再試一次'); return; }
+  var btn=document.getElementById('ac-send'); btn.disabled=true;
+  var row={id:'chat_'+Date.now(),post_id:chatPost.id,profile:who,text_content:t,expires_at:chatPost.expires_at};
+  var r=await sb.from('album_chats').insert(row);
+  btn.disabled=false;
+  if(r.error){ console.error(r.error); alert('訊息傳送失敗，請再試一次'); return; }
+  inp.value='';
+  chatMsgs.push(Object.assign({},row,{created_at:new Date().toISOString()}));
+  renderChat();
 }
-function closeVideoOverlay(e){
-  if(e&&e.target!==document.getElementById('video-overlay')&&e.target!==document.querySelector('#video-overlay button'))return;
-  var vid=document.getElementById('vo-vid');
-  vid.pause();
-  vid.removeAttribute('src');
-  vid.innerHTML='';
-  vid.load();
-  document.getElementById('video-overlay').style.display='none';
-}
+
+// 相簿滑動：入口往右滑打開瀏覽；瀏覽中往右滑看下一則、往左滑回上一則（滑回頭回到入口）
+(function(){
+  function addSwipe(el,fn){
+    if(!el)return;
+    var sx=0,sy=0;
+    el.addEventListener('touchstart',function(e){sx=e.touches[0].clientX;sy=e.touches[0].clientY;},{passive:true});
+    el.addEventListener('touchend',function(e){
+      var dx=e.changedTouches[0].clientX-sx, dy=e.changedTouches[0].clientY-sy;
+      if(Math.abs(dx)<50||Math.abs(dx)<Math.abs(dy))return;
+      fn(dx);
+    },{passive:true});
+  }
+  addSwipe(document.getElementById('alb-home'),function(dx){ if(dx>0)openViewer(0); });
+  addSwipe(document.getElementById('alb-viewer'),function(dx){
+    if(dx>0){ if(albIdx<albItems.length-1){ albIdx++; renderViewer(); } }
+    else{ if(albIdx>0){ albIdx--; renderViewer(); } else showAlbScreen('home'); }
+  });
+})();
 </script>
 </body>
 </html>

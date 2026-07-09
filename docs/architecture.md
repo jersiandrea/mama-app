@@ -41,21 +41,38 @@ with `{type:'text', text}` — see `callAI()`).
    Charts are hand-rolled SVG pies (`renderPie`) — no chart library.
 9. **ENGLISH LEARNING** — hardcoded `ALL_WORDS` (100 sentence pairs) + `VOCAB`.
    `todaysWords()` picks 5/day with a date-seeded PRNG (`seededRand`) so all
-   devices agree without server state. Playback chains SpeechSynthesis
-   utterances (zh → slow en → word-by-word en → zh) with a token-based
-   cancellation scheme: `_pt` increments on `stopAll()`, every async step checks
-   `chk()` before proceeding. If you touch playback, keep the token pattern or
-   overlapping audio returns. Conversation (`toggleEng`) sends `chatLog` to
-   `ai-proxy` (`english_chat`) with canned fallback bank `FB`.
+   devices agree without server state. UI is a single flashcard deck
+   (`buildDeck()` = 5 sentences + today's vocab in one array, `_deckIdx`
+   cursor, `renderCard()`, swipe left/right on `#flashcard` = `nextCard()`;
+   finger-right = next, per the user's spec). `playCard()` plays the current
+   card: sentence sequence zh → en 0.8x → word-by-word en 0.8x (2s gaps) → zh;
+   vocab sequence zh → en → en → zh. Rate is 0.8 (was 0.5 — 0.5 slurred on
+   iOS; do not lower it again). Cancellation is token-based: `_pt` increments
+   on `stopAll()`, every async step checks `chk()` before proceeding. If you
+   touch playback, keep the token pattern or overlapping audio returns.
+   Conversation (`toggleEng`) sends `chatLog` to `ai-proxy` (`english_chat`)
+   with canned fallback bank `FB`.
 10. **NOTIFICATIONS** — browser `Notification` scheduled by `setTimeout` from
     page load, deduped per-day via localStorage `nf_<type>_<date>`. No service
     worker: reminders fire only if the tab is open at the target time. This is a
     known limitation, not a bug — tell the user before "fixing" it.
-11. **ALBUM** — `compressImg` (canvas, max 1600px, JPEG quality stepped down to
-    ~900KB) and videos capped 10s / 5MB, both stored as **base64 data URLs
-    inline in the `album_posts` row** (no Storage bucket). Posts get a 24h
-    `expires_at`; `loadAlbum()` opportunistically deletes expired rows client-
-    side — there is no server-side cleanup.
+11. **ALBUM** — four screens inside `#t-alb`, toggled by `showAlbScreen()`
+    (`home` big-plus entry → native camera via one `<input capture
+    accept="image/*,video/*">` → `preview` cancel/upload → `viewer` → `chat`).
+    `viewer` and `chat` are `position:fixed` panels that stop 76px above the
+    bottom nav (nav stays visible); they live inside the tab div so tab
+    switching hides them. Viewer (`renderViewer`/`openViewer`) shows one post
+    full-screen, newest first: uploader + `fmtDt` top-left, download/chat
+    buttons bottom, videos loop, swipe right = older, swipe left = newer
+    (past the first post = back to `home`). Text-only posts from the old UI
+    still render (`.av-text`). Chat (`openChat`) is per-post: rows in
+    `album_chats` keyed by `post_id`, text only, expires with the post,
+    polled every 8s while open (`chatTimer`). Media pipeline unchanged:
+    `compressImg` (canvas, max 1600px, JPEG stepped down to ~900KB), videos
+    capped 10s / 5MB, stored as **base64 data URLs inline in the row** (no
+    Storage bucket). Posts get a 24h `expires_at`; `loadAlbum()`
+    opportunistically deletes expired `album_posts` AND `album_chats` rows
+    client-side — there is no server-side cleanup.
 
 ## Data model (Supabase; inferred from client calls — no schema file exists)
 
@@ -64,6 +81,9 @@ with `{type:'text', text}` — see `callAI()`).
   `created_at`.
 - `album_posts`: `id` ('alb_'+Date.now()), `text_content`, `photo` (data URL |
   null), `video` (data URL | null), `profile`, `expires_at`, `created_at`.
+- `album_chats`: `id` ('chat_'+Date.now()), `post_id` (→ album_posts.id, no
+  FK), `profile`, `text_content`, `expires_at` (copied from the post),
+  `created_at`.
 
 ## Conventions to preserve
 
