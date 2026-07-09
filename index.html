@@ -78,11 +78,16 @@ select,textarea,input[type=text],input[type=number],input[type=datetime-local]{
   border-radius:10px;padding:9px 14px;margin-bottom:12px;text-align:center;}
 /* English flashcards */
 #flashcard{margin:0 -16px 12px;background:var(--terra-l);border-radius:24px;
-  padding:24px 22px;min-height:62vh;display:flex;flex-direction:column;gap:18px;
-  touch-action:pan-y;}
-#flashcard .fc-text{flex:2;display:flex;flex-direction:column;justify-content:center;min-height:0;}
+  padding:24px 34px;min-height:62vh;display:flex;flex-direction:column;gap:18px;
+  touch-action:pan-y;position:relative;cursor:pointer;}
+#flashcard .fc-text{flex:2;display:flex;flex-direction:column;justify-content:center;
+  align-items:center;min-height:0;text-align:center;}
 .fc-en{font-size:40px;font-weight:700;line-height:1.3;color:var(--terra);word-break:break-word;}
 .fc-zh{font-size:30px;line-height:1.5;margin-top:16px;color:var(--ink);}
+.fc-arrow{position:absolute;top:30%;font-size:36px;font-weight:700;color:var(--terra);
+  opacity:.5;pointer-events:none;}
+.fc-arrow.l{left:10px;}.fc-arrow.r{right:10px;}
+#flashcard.fc-voc .fc-arrow{color:var(--sage);}
 .fc-play{flex:1;border:none;border-radius:18px;background:var(--terra);color:#fff;
   font-size:46px;display:flex;align-items:center;justify-content:center;min-height:100px;}
 #flashcard.fc-voc{background:var(--sage-l);}
@@ -105,10 +110,9 @@ select,textarea,input[type=text],input[type=number],input[type=datetime-local]{
   background:rgba(255,255,255,.85);color:var(--blue);font-size:80px;line-height:1;font-weight:700;
   display:flex;align-items:center;justify-content:center;padding:0;}
 .alb-hint{font-size:20px;color:var(--soft);text-align:center;line-height:1.5;}
-#alb-edge{position:absolute;top:0;right:-16px;width:20%;height:100%;z-index:5;background:none;border:none;}
-/* Album — 畫面三：全螢幕瀏覽 */
-#alb-viewer{position:fixed;top:0;left:0;right:0;bottom:76px;max-width:480px;margin:0 auto;
-  background:#111;z-index:90;overflow:hidden;touch-action:pan-y;}
+/* Album — 畫面三：全螢幕瀏覽（隱藏功能列，佔滿整個畫面） */
+#alb-viewer{position:fixed;inset:0;max-width:480px;margin:0 auto;
+  background:#111;z-index:150;overflow:hidden;touch-action:pan-y;cursor:pointer;}
 #av-media{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
 #av-media img,#av-media video{max-width:100%;max-height:100%;object-fit:contain;}
 .av-text{color:#fff;font-size:26px;padding:28px;line-height:1.7;}
@@ -124,6 +128,9 @@ select,textarea,input[type=text],input[type=number],input[type=datetime-local]{
   gap:12px;padding:16px;background:linear-gradient(transparent,rgba(0,0,0,.6));}
 .av-btn{border:none;border-radius:999px;background:rgba(255,255,255,.92);color:var(--ink);
   font-size:20px;font-weight:700;padding:14px 24px;}
+.av-arrow{position:absolute;top:50%;transform:translateY(-50%);font-size:44px;font-weight:700;
+  color:#fff;opacity:.65;pointer-events:none;z-index:2;text-shadow:0 1px 6px rgba(0,0,0,.6);}
+.av-arrow.l{left:10px;}.av-arrow.r{right:10px;}
 /* Album — 畫面四：聊天 */
 #alb-chat{position:fixed;top:0;left:0;right:0;bottom:76px;max-width:480px;margin:0 auto;
   background:var(--bg);z-index:90;flex-direction:column;}
@@ -277,6 +284,8 @@ select,textarea,input[type=text],input[type=number],input[type=datetime-local]{
       <h2 id="fc-label">今日五句生活英語</h2>
       <div class="pc" id="play-count">本日練習：0 次</div>
       <div id="flashcard">
+        <span class="fc-arrow l" id="fc-al">‹</span>
+        <span class="fc-arrow r" id="fc-ar">›</span>
         <div class="fc-text">
           <div class="fc-en" id="fc-en"></div>
           <div class="fc-zh" id="fc-zh"></div>
@@ -284,7 +293,7 @@ select,textarea,input[type=text],input[type=number],input[type=datetime-local]{
         <button class="fc-play" id="fc-play" onclick="playCard()" aria-label="播放這張字卡">🔊</button>
       </div>
       <div class="fc-dots" id="fc-dots"></div>
-      <p class="soft" style="text-align:center;margin:4px 0 18px;">左右滑動可以換一張字卡</p>
+      <p class="soft" style="text-align:center;margin:4px 0 18px;">點字卡的左邊或右邊，可以換上一張、下一張</p>
       <div class="card">
         <h2>開口說說看</h2>
         <p class="soft" style="margin:0 0 12px;font-size:16px;">說英文練習對話。</p>
@@ -301,14 +310,13 @@ select,textarea,input[type=text],input[type=number],input[type=datetime-local]{
 
       <!-- 畫面一：入口 -->
       <div id="alb-home">
-        <div class="alb-entry">
-          <button id="alb-plus" onclick="albCapture()" aria-label="拍照或錄影分享給家人">＋</button>
-          <div class="alb-hint">點一下「＋」<br>拍照或錄影分享給家人</div>
+        <div class="alb-entry" onclick="albCapture()" role="button" aria-label="拍照或錄影分享給家人" style="cursor:pointer;">
+          <div id="alb-plus" aria-hidden="true">＋</div>
+          <div class="alb-hint">點一下這裡<br>拍照或錄影分享給家人</div>
           <div class="soft" id="alb-count" style="font-size:16px;text-align:center;"></div>
         </div>
         <button class="big b-blue" onclick="openViewer(0)">👀　看看家人的分享</button>
-        <p class="soft" style="font-size:15px;margin-top:2px;text-align:center;">也可以往右滑動打開｜內容 24 小時後自動刪除</p>
-        <button id="alb-edge" onclick="openViewer(0)" aria-label="看看家人的分享"></button>
+        <p class="soft" style="font-size:15px;margin-top:2px;text-align:center;">內容 24 小時後自動刪除</p>
       </div>
       <input type="file" id="alb-file" accept="image/*,video/*" capture="environment" style="display:none;" onchange="onAlbFile(this)">
 
@@ -329,6 +337,8 @@ select,textarea,input[type=text],input[type=number],input[type=datetime-local]{
         <div id="av-media"></div>
         <div id="av-meta"></div>
         <div id="av-pos"></div>
+        <span class="av-arrow l" id="av-al">‹</span>
+        <span class="av-arrow r" id="av-ar">›</span>
         <button id="av-close" onclick="showAlbScreen('home')" aria-label="回到相簿首頁">✕</button>
         <div class="av-actions">
           <button class="av-btn" onclick="albDownload()">⬇️　儲存</button>
@@ -838,6 +848,8 @@ function renderCard() {
     document.getElementById('fc-label').textContent=(c.kind==='sen'?'今日五句生活英語':'今日重點單字');
     card.className=(c.kind==='voc'?'fc-voc':'');
     document.getElementById('fc-play').textContent='🔊';
+    document.getElementById('fc-al').style.visibility=(_deckIdx>0?'visible':'hidden');
+    document.getElementById('fc-ar').style.visibility=(_deckIdx<_deck.length-1?'visible':'hidden');
     var dots='';
     for(var k=0;k<_deck.length;k++) dots+='<span class="fc-dot'+(k===_deckIdx?' on':'')+'"></span>';
     document.getElementById('fc-dots').innerHTML=dots;
@@ -921,17 +933,15 @@ function playCard() {
   }
 }
 
-// 字卡左右滑動：手指往右＝下一張，往左＝上一張
+// 字卡換頁：點左半邊＝上一張、右半邊＝下一張（滑動手勢跟瀏覽器的上/下一頁衝突，改用點按）
 (function(){
   var fc=document.getElementById('flashcard');
   if(!fc)return;
-  var sx=0,sy=0;
-  fc.addEventListener('touchstart',function(e){sx=e.touches[0].clientX;sy=e.touches[0].clientY;},{passive:true});
-  fc.addEventListener('touchend',function(e){
-    var dx=e.changedTouches[0].clientX-sx, dy=e.changedTouches[0].clientY-sy;
-    if(Math.abs(dx)<40||Math.abs(dx)<Math.abs(dy))return;
-    nextCard(dx>0?1:-1);
-  },{passive:true});
+  fc.addEventListener('click',function(e){
+    if(e.target&&e.target.closest&&e.target.closest('.fc-play'))return;
+    var r=fc.getBoundingClientRect();
+    nextCard(e.clientX<r.left+r.width/2?-1:1);
+  });
 })();
 
 // Conversation
@@ -1078,8 +1088,15 @@ function showAlbScreen(name){
   if(name!=='chat'&&chatTimer){ clearInterval(chatTimer); chatTimer=null; }
 }
 
-// 畫面一 → 二：點「＋」開手機相機（拍照或錄影）
-function albCapture(){ document.getElementById('alb-file').click(); }
+// 畫面一 → 二：點白框開手機相機（拍照或錄影）
+// 開相機前必須把語音播放和錄音全部收乾淨，否則 iOS 相機會顯示「通話時無法錄影」
+function albCapture(){
+  try{ stopAll(); }catch(e){}
+  try{ speechSynthesis.cancel(); }catch(e){}
+  try{ if(engRec){engRec.abort();engRec=null;engListen=false;} }catch(e){}
+  try{ if(accRec){accRec.abort();accRec=null;accListen=false;} }catch(e){}
+  document.getElementById('alb-file').click();
+}
 
 async function onAlbFile(input){
   var file=input.files[0]; if(!file)return;
@@ -1184,6 +1201,8 @@ function renderViewer(){
     +'<div class="av-time">'+fmtDt(it.created_at)+'</div>'
     +(it.text_content&&(it.photo||it.video)?'<div class="av-cap">'+esc(it.text_content)+'</div>':'');
   document.getElementById('av-pos').textContent=(albIdx+1)+' / '+albItems.length;
+  document.getElementById('av-al').style.visibility='visible';
+  document.getElementById('av-ar').style.visibility=(albIdx<albItems.length-1?'visible':'hidden');
 }
 
 function albDownload(){
@@ -1255,22 +1274,19 @@ async function sendChat(){
   renderChat();
 }
 
-// 相簿滑動：入口往右滑打開瀏覽；瀏覽中往右滑看下一則、往左滑回上一則（滑回頭回到入口）
+// 瀏覽換頁：點左半邊＝上一則（回到頭就回入口）、右半邊＝下一則（滑動手勢跟瀏覽器手勢衝突，改用點按）
 (function(){
-  function addSwipe(el,fn){
-    if(!el)return;
-    var sx=0,sy=0;
-    el.addEventListener('touchstart',function(e){sx=e.touches[0].clientX;sy=e.touches[0].clientY;},{passive:true});
-    el.addEventListener('touchend',function(e){
-      var dx=e.changedTouches[0].clientX-sx, dy=e.changedTouches[0].clientY-sy;
-      if(Math.abs(dx)<50||Math.abs(dx)<Math.abs(dy))return;
-      fn(dx);
-    },{passive:true});
-  }
-  addSwipe(document.getElementById('alb-home'),function(dx){ if(dx>0)openViewer(0); });
-  addSwipe(document.getElementById('alb-viewer'),function(dx){
-    if(dx>0){ if(albIdx<albItems.length-1){ albIdx++; renderViewer(); } }
-    else{ if(albIdx>0){ albIdx--; renderViewer(); } else showAlbScreen('home'); }
+  var av=document.getElementById('alb-viewer');
+  if(!av)return;
+  av.addEventListener('click',function(e){
+    if(e.target&&e.target.closest&&e.target.closest('button'))return;
+    var r=av.getBoundingClientRect();
+    if(e.clientX<r.left+r.width/2){
+      if(albIdx>0){ albIdx--; renderViewer(); }
+      else showAlbScreen('home');
+    }else{
+      if(albIdx<albItems.length-1){ albIdx++; renderViewer(); }
+    }
   });
 })();
 </script>

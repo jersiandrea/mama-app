@@ -43,8 +43,9 @@ with `{type:'text', text}` — see `callAI()`).
    `todaysWords()` picks 5/day with a date-seeded PRNG (`seededRand`) so all
    devices agree without server state. UI is a single flashcard deck
    (`buildDeck()` = 5 sentences + today's vocab in one array, `_deckIdx`
-   cursor, `renderCard()`, swipe left/right on `#flashcard` = `nextCard()`;
-   finger-right = next, per the user's spec). `playCard()` plays the current
+   cursor, `renderCard()`, tap left/right half of `#flashcard` = `nextCard()`
+   prev/next — swipe was removed because it collides with Safari's
+   back/forward edge gesture; don't reintroduce it). `playCard()` plays the current
    card: sentence sequence zh → en 0.8x → word-by-word en 0.8x (2s gaps) → zh;
    vocab sequence zh → en → en → zh. Rate is 0.8 (was 0.5 — 0.5 slurred on
    iOS; do not lower it again). Cancellation is token-based: `_pt` increments
@@ -59,12 +60,17 @@ with `{type:'text', text}` — see `callAI()`).
 11. **ALBUM** — four screens inside `#t-alb`, toggled by `showAlbScreen()`
     (`home` big-plus entry → native camera via one `<input capture
     accept="image/*,video/*">` → `preview` cancel/upload → `viewer` → `chat`).
-    `viewer` and `chat` are `position:fixed` panels that stop 76px above the
-    bottom nav (nav stays visible); they live inside the tab div so tab
-    switching hides them. Viewer (`renderViewer`/`openViewer`) shows one post
-    full-screen, newest first: uploader + `fmtDt` top-left, download/chat
-    buttons bottom, videos loop, swipe right = older, swipe left = newer
-    (past the first post = back to `home`). Text-only posts from the old UI
+    `viewer` is a true full-screen `position:fixed` panel (`inset:0`,
+    z-index 150 — it deliberately covers the bottom nav; closing it reveals
+    the nav again). `chat` stops 76px above the nav so the nav stays visible
+    there. Both live inside the tab div so tab switching hides them. Viewer
+    (`renderViewer`/`openViewer`) shows one post full-screen, newest first:
+    uploader + `fmtDt` top-left, download/chat buttons bottom, videos loop,
+    tap right half = older, tap left half = newer (past the first post =
+    back to `home`; swipe was removed — Safari edge-gesture collision).
+    `albCapture()` force-stops all speech playback/recognition before
+    opening the camera input — without this iOS shows「通話時無法錄影」
+    because the page still holds an audio session; keep that cleanup. Text-only posts from the old UI
     still render (`.av-text`). Chat (`openChat`) is per-post: rows in
     `album_chats` keyed by `post_id`, text only, expires with the post,
     polled every 8s while open (`chatTimer`). Media pipeline unchanged:
